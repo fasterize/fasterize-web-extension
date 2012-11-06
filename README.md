@@ -1,5 +1,4 @@
-
-# chrome-spdy-indicator
+# chrome-fasterize-indicator
 
 Chrome Extension to see an indicator when a page is fasterized in the address bar.
 
