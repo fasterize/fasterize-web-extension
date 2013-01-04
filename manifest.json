@@ -15,6 +15,7 @@
   }],
   "page_action": {
     "default_title": "Fasterized",
+    "default_popup": "popup.html"
   },
   "icons": {
     "128": "icon-extension.png"

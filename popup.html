@@ -1,0 +1,123 @@
+<html>
+<head>
+  <style type="text/css">
+  body {
+    width: 400px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .group {
+    margin: 15px;
+  }
+  .group label {
+    margin: 7px 0px 7px 0px;
+    padding: 4px;
+  }
+
+  .group label:hover{
+    background: #FEFEFE;
+    font-weight: bold;
+    border-radius: 3px;
+
+    transition-property: background, font-weight;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333333;
+  }
+  h3 {
+    border-bottom: 1px solid #CFCECE;
+    margin-bottom: 10px;
+    margin-top: 15px;
+    font-size: 18px;
+    line-height: 27px;
+  }
+
+  .radio input[type="radio"], .checkbox input[type="checkbox"] {
+    float: left;
+    margin-left: -18px;
+  }
+  input[type="image"], input[type="checkbox"], input[type="radio"] {
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 3px 0;
+    line-height: normal;
+    cursor: pointer;
+    background-color: transparent;
+    border: 0 9;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+  }
+  </style>
+
+</head>
+<body>
+  <h1>Disable a rule</h1>
+  <form accept-charset="UTF-8" action="" method="post"><div style="margin:0;padding:0;display:inline">
+    <h3>
+      Minimize payload size
+    </h3>
+    <div class="group">
+      <label class="checkbox">
+        Minify JavaScript
+        <input type="checkbox" id="frz-minifyjs" value="frz-minifyjs" />
+      </label>
+      <label class="checkbox">
+        Minify CSS
+        <input type="checkbox" id="frz-minifycss" value="frz-minifycss" />
+      </label>
+      <label class="checkbox">
+        Minify HTML
+        <input type="checkbox" id="frz-minifyhtml" value="frz-minifyhtml" />
+      </label>
+      <label class="checkbox">
+        Optimize PNG and JPEG images
+        <input type="checkbox" id="frz-compressimgs" value="frz-compressimgs" />
+      </label>
+    </div>
+    <h3>
+      Minimize round-trip times
+    </h3>
+    <div class="group">
+      <label class="checkbox">
+        Combine external JavaScript
+        <input type="checkbox" id="frz-concatjs" value="frz-concatjs" />
+      </label>
+      <label class="checkbox">
+        Combine external CSS
+        <input type="checkbox" id="frz-concatcss" value="frz-concatcss" />
+      </label>
+
+    </div>
+    <h3>
+      Opitmize start render
+    </h3>
+    <div class="group">
+      <label class="checkbox">
+        Defer loading of JavaScript
+        <input type="checkbox" id="frz-deferjs" value="frz-deferjs" />
+      </label>
+      <label class="checkbox">
+        Images lazyloading
+        <input type="checkbox" id="frz-lazyload" value="frz-lazyload" />
+      </label>
+      <label class="checkbox">
+        Parallelize downloads across hostnames
+        <input type="checkbox" id="frz-sharding" value="frz-sharding" />
+      </label>
+    </div>
+
+    <div>
+      <input class="btn btn-primary" id="submit" name="commit" type="button" value="Disable" />
+    </div>
+  </form>
+  <script type="text/javascript" src="popup.js"></script>
+</body>
+</html>
