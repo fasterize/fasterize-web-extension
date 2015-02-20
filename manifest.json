@@ -1,23 +1,25 @@
 {
-  "name": "Fasterize indicator",
+"update_url":"http://clients2.google.com/service/update2/crx",
+  "name": "Fasterize Status",
+  "version": "0.1",
   "manifest_version": 2,
-  "description": "an indicator when a page is fasterized in the address bar.",
-  "version": "0.0.1",
-  "permissions": ["tabs"],
-  "background": { "scripts": ["indicator.js"] },
-  "web_accessible_resources" : [
-    "script.js"
-  ],
-  "content_scripts": [{
-    "matches": ["*://*/*"],
-    "js": ["content.js"],
-    "run_at": "document_idle"
-  }],
-  "page_action": {
-    "default_title": "Fasterized",
-    "default_popup": "popup.html"
-  },
+  "description": "See the status of the request.",
   "icons": {
-    "128": "icon-extension.png"
-  }
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "page_action": {
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "webNavigation",
+	"webRequest",
+	"tabs",
+	"http://*/*",
+	"https://*/*"
+   ]
 }
