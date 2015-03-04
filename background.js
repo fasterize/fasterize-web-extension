@@ -36,7 +36,7 @@ findHeaderListener = function(details) {
   var fasterized = null;
   for (var i = 0; i < details.responseHeaders.length; i++) {
     var header = details.responseHeaders[i];
-    if (header.name == 'x-fstrz') {
+    if (header.name == 'x-fstrz' || header.name == 'X-fstrz') {
       var codeArray = header.value.split(',');
       for (var j = 0; j < codeArray.length; j++) {
         var code = codeArray[j];
