@@ -76,22 +76,31 @@ function translateStatusCode(fstrzHeader) {
 
 
 function updatePageAction(tabId) {
-  if (tabFasterized[tabId]) {
-    chrome.pageAction.setIcon({
-      tabId: tabId,
-	    path: tabFasterized[tabId] + "19.png"
-    }, function() {
-	  chrome.pageAction.setTitle({
-	    "title": "Fasterize Status : " + tabFasterizedHeader[tabId] + " \n-" + translateStatusCode(tabFasterizedHeader[tabId]),
-		  "tabId": tabId
-	  });
-      chrome.pageAction.show(tabId);
-    });
-  }
-  else {
-    chrome.pageAction.hide(tabId);
-  }
+  chrome.tabs.query({}, function (tabs) {
+    var tabsIds = tabs.map(function (tab) {return tab.id});
+
+    if (tabId !== -1 && tabsIds.indexOf(tabId) !== -1 ) {
+      if (tabFasterized[tabId]) {
+        chrome.pageAction.setIcon({
+          tabId: tabId,
+          path: tabFasterized[tabId] + "19.png"
+        }, function() {
+          chrome.pageAction.setTitle({
+            "title": "Fasterize Status : " + tabFasterizedHeader[tabId] + " \n-" + translateStatusCode(tabFasterizedHeader[tabId]),
+            "tabId": tabId
+          });
+          chrome.pageAction.show(tabId);
+        });
+      }
+      else {
+        chrome.pageAction.hide(tabId);
+      }
+    }
+  });
 }
+chrome.tabs.onReplaced.addListener(function (tabId) {
+  updatePageAction(tabId);
+});
 
 chrome.tabs.onSelectionChanged.addListener(function(tabId, info) {
   selectedId = tabId;
