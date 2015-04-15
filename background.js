@@ -53,12 +53,11 @@ findHeaderListener = function(details) {
 	  }
   }
 	tabFasterized[details.tabId] = fasterized;
-
-  chrome.webRequest.onHeadersReceived.removeListener(findHeaderListener);
 	updatePageAction(details.tabId);
 }
 
 chrome.webNavigation.onBeforeNavigate.addListener(function(details) {
+  chrome.webRequest.onResponseStarted.removeListener(findHeaderListener);
   if (details.frameId == 0) {
 	var filter = {types:["main_frame"], urls:["<all_urls>"]};
     chrome.webRequest.onResponseStarted.addListener(findHeaderListener, filter,["responseHeaders"]);
