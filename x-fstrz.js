@@ -1,0 +1,37 @@
+var optimizedCodes = ["o", "w"];
+var cachedCodes = ["c", "clc", "sc"];
+
+var codeMapping = {
+  "p" : "proxified",
+  "o" : "optimized",
+  "b" : "ip blocked",
+  "!o": "won't optimize",
+  "w": "working",
+  "Z": "not optimizable",
+  "ab": "not optimized (abtest)",
+  "stc": "status code different than 200",
+  "zc": "no content",
+  "ecc": "excluded by the configuration",
+  "tecc": "tag excluded by the configuration",
+  "m": "method not optimizable",
+  "ed": "engine disabled",
+  "h": "not html content",
+  "c": "cached",
+  "sc": "smart cached",
+  "dc": "dynamic cached",
+  "!c": "not cachable",
+  "v": "virtual resource",
+  "e": "error in the engine",
+  "vf": "virtual fallback",
+  "t": "timeout",
+  "ccb": "cache callback",
+  "clc": "cookieless cached",
+  "cbo": "circuit breaker opened",
+  "of,!id": "overflow no id",
+  "of,!conf": "overflow no conf",
+  "of,!en": "overflow not enabled",
+  "of,wen": "overflow was enabled",
+  "of,en": "overflow enabled",
+  "of,dis": "overflow disallow",
+  "pp": "partial page"
+}

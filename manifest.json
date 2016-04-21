@@ -1,25 +1,31 @@
 {
 "update_url":"http://clients2.google.com/service/update2/crx",
   "name": "Fasterize Status",
-  "version": "0.2",
+  "version": "1.0",
   "manifest_version": 2,
   "description": "See the status of the request.",
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "icons/store/icon16.png",
+    "48": "icons/store/icon48.png",
+    "128": "icons/store/icon128.png"
   },
   "page_action": {
-    "default_icon": "icon.png"
+    "default_title": "Fasterize"
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["x-fstrz.js", "frz_request.js", "main.js"],
+    "persistent": true
   },
   "permissions": [
     "webNavigation",
-	"webRequest",
-	"tabs",
-	"http://*/*",
-	"https://*/*"
-   ]
+  	"webRequest",
+  	"tabs",
+  	"http://*/*",
+  	"https://*/*"
+  ],
+  "content_scripts": [{
+      "matches": ["<all_urls>"],
+      "js" : ["contentscript.js"],
+      "run_at": "document_start"
+  }]
 }
