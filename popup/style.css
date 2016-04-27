@@ -1,0 +1,30 @@
+/* Base Rules */
+body {
+  text-align: center;
+  height: 100%;
+  margin: 0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#154364), to(#37778f));
+  background: -webkit-linear-gradient(top, #154364, #37778f);
+  background: linear-gradient(to bottom, #154364,#37778f);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  width: 500px;
+}
+
+.content section {
+  padding: 10px;
+  border-radius: 4px;
+  -webkit-box-shadow: 0px 0px 2px 0px rgba(108,128,136,0.4);
+  box-shadow: 0px 0px 2px 0px rgba(108,128,136,0.4);
+  margin: 15px;
+  background: white;
+  text-align: left
+}
+
+.content section h2 {
+  margin: 3px 0px;
+}
+
+.content section h3 {
+  margin: 0px 0px;
+}

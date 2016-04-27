@@ -10,16 +10,19 @@
     "128": "icons/store/icon128.png"
   },
   "page_action": {
-    "default_title": "Fasterize"
+    "default_title": "Fasterize",
+    "default_icon": "icons/store/icon.png"
   },
   "background": {
-    "scripts": ["x-fstrz.js", "frz_request.js", "main.js"],
+    "scripts": ["x-fstrz.js", "frz-request.js", "main.js"],
     "persistent": true
   },
   "permissions": [
     "webNavigation",
   	"webRequest",
+    "clipboardWrite",
   	"tabs",
+    "cookies",
   	"http://*/*",
   	"https://*/*"
   ],
