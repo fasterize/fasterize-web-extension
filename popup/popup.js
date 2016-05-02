@@ -85,7 +85,7 @@ function setDebugCookie(url, value, callback) {
         $('#fstrz-true').hide();
       }
 
-      $('#cookie-fstrz').val(fstrzCookie.value);
+      $('#cookie-fstrz').val(fstrzCookie && fstrzCookie.value);
     });
 
     getFstrzVaryCookie(request.details.url, function (fstrzVaryCookie) {
