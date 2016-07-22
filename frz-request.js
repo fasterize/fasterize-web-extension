@@ -32,6 +32,10 @@ FRZRequest.prototype.preProcessHeaders = function () {
   if ('x-fstrz' in this.headers) {
     this.processXFstrzHeader();
   }
+
+  if (this.details.statusCode > 500) {
+    this.inError = true;
+  }
 };
 
 FRZRequest.prototype.processXFstrzHeader = function () {
