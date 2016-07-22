@@ -115,7 +115,9 @@ FRZRequest.prototype.servedByFasterize = function () {
     this.details.ip === "212.83.128.22" ||
     this.details.ip === "212.83.173.208" ||
     this.details.ip === "122.144.138.114" ||
-    this.details.ip === "122.144.138.113");
+    this.details.ip === "122.144.138.113" ||
+    this.details.ip === "162.243.74.238" ||
+    this.details.ip === "104.236.170.152");
 };
 
 FRZRequest.prototype.findPop = function () {
@@ -124,6 +126,12 @@ FRZRequest.prototype.findPop = function () {
   }
   else if (this.details.ip === "122.144.138.114" || this.details.ip === "122.144.138.113") {
     return "Shanghai (China)";
+  }
+  else if (this.details.ip === "162.243.74.238") {
+    return "New York (United States)";
+  }
+  else if (this.details.ip === "104.236.170.152") {
+    return "San Francisco (United States)";
   }
 };
 
