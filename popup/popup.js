@@ -44,6 +44,13 @@ function setDebugCookie(url, value, callback) {
   }, callback);
 }
 
+function removeFrzVaryCookie(url, callback) {
+  chrome.cookies.remove({
+    url: url,
+    name: 'fstrz_vary'
+  }, callback);
+}
+
 (function () {
   'use strict';
   /* global $ */
@@ -109,8 +116,11 @@ function setDebugCookie(url, value, callback) {
 
     $('#fstrz-false').on('click', function() {
       setFstrzCookie(request.details.url, 'false', function () {
-        chrome.tabs.reload(tabID, {bypassCache :false}, chrome.runtime.reload);
-      })
+        removeFrzVaryCookie(request.details.url, function(){
+          chrome.tabs.reload(tabID, {bypassCache :false}, chrome.runtime.reload);
+        });
+      });
+
     });
 
     $('#enable-trace').on('click', function () {
