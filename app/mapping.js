@@ -40,3 +40,51 @@ var codeMapping = {
   "b": "blocked, IP address is blocked",
   "uc": "User Canceled, request was cancelled by the user"
 }
+
+var keycdnPOP = {
+  'usat' : 'Atlanta, USA',
+  'usch' : 'Chicago, USA',
+  'usda' : 'Dallas, USA',
+  'msmc' : 'Mexico City, Mexico',
+  'usmi' : 'Miami, USA',
+  'camo' : 'Montreal, Canada',
+  'usla' : 'Los Angeles, USA',
+  'ussj' : 'San Jose, USA',
+  'brsp' : 'São Paulo, Brazil',
+  'usse' : 'Seattle, USA',
+  'uswd' : 'Washington D.C., USA',
+  'nlam' : 'Amsterdam, Netherlands',
+  'defr' : 'Frankfurt, Germany',
+  'tris' : 'Istanbul, Turkey',
+  'uklo' : 'London, UK',
+  'itmi' : 'Milano, Italy',
+  'rumo' : 'Moscow, Russia',
+  'frpa' : 'Paris, France',
+  'sest' : 'Stockholm, Sweden',
+  'spva' : 'Valencia, Spain',
+  'swzu' : 'Zurich, Switzerland',
+  'cnhk' : 'Hong Kong, China',
+  'ausy' : 'Sydney, Australia',
+  'sgsg' : 'Singapore',
+  'jato' : 'Tokyo, Japan'
+}
+
+var frzPoP = [
+  {
+    pop:'frpa',
+    popName:'Paris (France)',
+    ip:['212.83.128.22','212.83.173.208','212.83.161.118'],
+  },
+  {
+    pop:'usny',
+    popName:'New-York (United States)',
+    ip:['162.243.74.238'],
+  },
+  {
+    pop:'ussf',
+    popName:'San Francisco (United States)',
+    ip:['104.236.170.152'],
+  }
+  ];
+
+var frzIP = frzPoP.reduce(function(acc,arr){return {ip:acc.ip.concat(arr.ip)}}).ip

@@ -8,7 +8,8 @@ body {
   background: linear-gradient(to bottom, #154364,#37778f);
   background-repeat: no-repeat;
   background-attachment: fixed;
-  width: 500px;
+  width: 560px;
+  font-size: 13px;
 }
 
 .content section {
@@ -27,4 +28,20 @@ body {
 
 .content section h3 {
   margin: 0px 0px;
+}
+
+.tab-pane {
+  padding: 10px 10px 0px 10px;
+}
+
+.nav-tabs {
+  margin-top: 0px;
+}
+
+.copy-button {
+  height:34px;
+}
+
+.input-group-addon {
+  font-size: 12px;
 }

@@ -1,0 +1,52 @@
+{
+  "name": "Fasterize Status",
+  "version": "1.3.7",
+  "manifest_version": 2,
+  "description": "See detailed information on a fasterized page",
+  "icons": {
+    "48": "icons/store/icon48.png"
+  },
+  "page_action": {
+    "browser_style": true,
+    "default_title": "Fasterize",
+    "default_icon": "icons/store/icon.png"
+  },
+  "background": {
+    "scripts": [
+      "vendor/browser-polyfill.js",
+      "mapping.js",
+      "frz-request.js",
+      "main.js"
+    ]
+  },
+  "permissions": [
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking",
+    "clipboardWrite",
+    "tabs",
+    "cookies",
+    "storage",
+    "<all_urls>",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "vendor/browser-polyfill.js",
+        "contentscript.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "applications": {
+    "gecko": {
+      "update_url": "https://raw.githubusercontent.com/fasterize/fasterize-web-extension/master/app/update-manifest.json",
+      "strict_min_version": "48.0"
+    }
+  }
+}
