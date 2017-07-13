@@ -1,0 +1,31 @@
+{
+    "name": "Fasterize-Status",
+    "version": "1.5.1",
+    "description": "See the status of the request.",
+    "main": "main.js",
+    "scripts": {
+        "start": "npm run dev:firefox",
+        "lint": "web-ext -s app lint -i vendor/*",
+        "dev": "web-ext -a dist/firefox -s app run --url http://www.fasterize.com",
+        "release": "",
+        "publish:firefox": "web-ext -a dist/firefox -s app build --overwrite-dest && web-ext -a dist/firefox -s app sign --api-key=$MOZILLA_API_KEY --api-secret=$MOZILLA_API_SECRET",
+        "publish:chrome": "grunt publish_chrome"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/fasterize/fasterize-web-extension.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/fasterize/fasterize-web-extension/issues"
+    },
+    "homepage": "https://github.com/fasterize/fasterize-web-extension#readme",
+    "devDependencies": {
+        "grunt": "^1.0.1",
+        "grunt-contrib-compress": "^1.3.0",
+        "grunt-webstore-upload": "^0.9.3",
+        "load-grunt-tasks": "^3.5.2",
+        "web-ext": "^1.10.0"
+    }
+}
