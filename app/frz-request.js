@@ -135,7 +135,8 @@ class FRZRequest {
     if (this.headers['server'] === 'keycdn-engine') {
       return `KeyCDN - ${keycdnPOP[this.headers['x-edge-location'].replace(/\d+/, '')]}`;
     } else if (this.servedByFasterize()) {
-      return frzPoP.find(pop => pop.ip.includes(ip)).popName;
+      const pop = frzPoP.find(pop => pop.ip.includes(ip));
+      return pop ? pop.popName : frzPoP[0].popName;
     } else {
       return 'Not found';
     }

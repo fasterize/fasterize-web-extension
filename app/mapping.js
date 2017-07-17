@@ -84,6 +84,11 @@ var frzPoP = [
     pop:'ussf',
     popName:'San Francisco (United States)',
     ip:['104.236.170.152'],
+  },
+  {
+    pop:'frstag',
+    popName:'Paris (Staging environment)',
+    ip:['95.85.35.99','95.85.12.61'],
   }
   ];
 
