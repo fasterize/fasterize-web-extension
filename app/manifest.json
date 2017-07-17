@@ -4,7 +4,9 @@
   "manifest_version": 2,
   "description": "See detailed information on a fasterized page",
   "icons": {
-    "48": "icons/store/icon48.png"
+    "16": "icons/store/icon16.png",
+    "48": "icons/store/icon48.png",
+    "128": "icons/store/icon128.png"
   },
   "page_action": {
     "browser_style": true,
