@@ -18,7 +18,7 @@ Chrome and Firefox web extension for Fasterize
 ## Chrome
 
 Load the `app` directory into chrome (go to chrome://extensions/ and click on "Load unpacked extension").
-You can also install (Extension Reloader)[https://chrome.google.com/webstore/detail/extensions-reloader/fimgfedafeadlieiabdeeaodndnlbhid] to perform live-reloading.
+You can also install [Extension Reloader](https://chrome.google.com/webstore/detail/extensions-reloader/fimgfedafeadlieiabdeeaodndnlbhid) to perform live-reloading.
 
 Debugging : go to `chrome://extensions`
 Reference is https://developer.chrome.com/extensions/tut_debugging
