@@ -21,6 +21,10 @@
         {
           "version": "2.1.2",
           "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/2.1.2/fasterize_status-2.1.2-an.fx.xpi"
+        },
+        {
+          "version": "2.1.2",
+          "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/2.1.2/fasterize_status-2.1.2-an.fx.xpi"
         }
       ]
     }
