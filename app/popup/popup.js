@@ -107,6 +107,7 @@ function reloadPopup(tabID) {
     $('#protocol').text(request.getProtocol());
     $('#statusCode').text(request.details.statusCode);
     $('#pop').text(request.findPop());
+    $('#ip').text(request.ip);
 
     getFstrzCookie(request.details.url).then(fstrzCookie => {
       if (fstrzCookie && fstrzCookie.value === 'false') {

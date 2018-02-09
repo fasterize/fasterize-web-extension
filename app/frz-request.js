@@ -25,6 +25,7 @@ class FRZRequest {
     this.inError = false;
     this.cachedbyCDN = false;
     this.status = {};
+    this.ip = details.ip
 
     this.preProcessHeaders();
   }
@@ -147,6 +148,7 @@ class FRZRequest {
   }
 
   getProtocol() {
+    console.log(this.connectionType);
     return this.connectionType;
   }
 
