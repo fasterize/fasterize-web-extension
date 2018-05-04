@@ -110,7 +110,7 @@ function reloadPopup(tabID) {
     $('#ip').text(request.ip);
 
     getFstrzCookie(request.details.url).then(fstrzCookie => {
-      if (fstrzCookie && fstrzCookie.value === 'false') {
+      if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
         $('#fstrz-false').hide();
       } else {
         $('#fstrz-true').hide();
