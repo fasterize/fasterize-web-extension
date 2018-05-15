@@ -11,12 +11,20 @@ function setFstrzCookie(url, value) {
     rootDomain = `.${tmp.hostname.split('.').slice(-3).join('.')}`;
   }
 
-  return browser.cookies.set({
-    url: tmp.origin,
-    domain: rootDomain,
-    name: 'fstrz',
-    value,
-  });
+  return Promise.all([
+    browser.cookies.set({
+      url: tmp.origin,
+      domain: rootDomain,
+      name: 'fstrz',
+      value
+    }),
+    browser.cookies.set({
+      url: tmp.origin,
+      domain: rootDomain,
+      name: 'frz-forced_state',
+      value: 'true'
+    })
+  ]);
 }
 
 function getFstrzCookie(url) {
