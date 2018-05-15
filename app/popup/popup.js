@@ -61,7 +61,7 @@ function removeFrzVaryCookie(url) {
 }
 
 function reloadPopup(tabID) {
-  return browser.tabs.reload(tabID, { bypassCache: false }).then(() => browser.runtime.reload()).catch(logError);
+  return browser.tabs.reload(tabID, { bypassCache: false }).then(() => window.close()).catch(logError);
 }
 
 (() => {
