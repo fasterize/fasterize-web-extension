@@ -21,7 +21,7 @@ function setFstrzCookie(url, value) {
     browser.cookies.set({
       url: tmp.origin,
       domain: rootDomain,
-      name: 'frz-forced_state',
+      name: 'frz-forced-state',
       value: 'true'
     })
   ]);
