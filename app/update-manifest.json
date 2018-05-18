@@ -45,10 +45,6 @@
         {
           "version": "2.1.6",
           "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/2.1.6/fasterize_status-2.1.6-an.fx.xpi"
-        },
-        {
-          "version": "2.1.6",
-          "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/2.1.6/fasterize_status-2.1.6-an.fx.xpi"
         }
       ]
     }
