@@ -20,6 +20,13 @@ function getFragments() {
   return res;
 }
 
+function getDeferjsDebug() {
+  var s = document.createElement('script');
+  s.setAttribute('type', 'text/javascript');
+  s.setAttribute('src', chrome.extension.getURL('show_deferjs_trace.js'));
+  document.body.appendChild(s);
+}
+
 browser.runtime.onMessage.addListener((request, sender) => {
   switch (request.action) {
     case 'check_connection_info':
@@ -31,6 +38,9 @@ browser.runtime.onMessage.addListener((request, sender) => {
       break;
     case 'get_fragments':
       return Promise.resolve(getFragments());
+      break;
+    case 'get_deferjs_debug':
+      return Promise.resolve(getDeferjsDebug());
       break;
     default:
       return Promise.reject('unexpected message');

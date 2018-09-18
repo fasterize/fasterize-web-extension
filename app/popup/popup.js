@@ -209,5 +209,9 @@ function reloadPopup(tabID) {
       browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
       browser.runtime.sendMessage({ action: 'update-settings', 'disable-fasterize-cache': this.checked }).catch(logError);
     });
+
+    $('#show-deferjs-debug').on('click', () => {
+      request.getDeferjsDebug();
+    });
   });
 })();

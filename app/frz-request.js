@@ -136,7 +136,6 @@ class FRZRequest {
   }
 
   getProtocol() {
-    console.log(this.connectionType);
     return this.connectionType;
   }
 
@@ -240,6 +239,11 @@ class FRZRequest {
       .sendMessage(this.details.tabId, { action: 'get_fragments' })
       .catch(logError);
   }
+
+  getDeferjsDebug() {
+    return browser.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch(logError);
+  }
+
 }
 
 window.FRZRequest = FRZRequest;

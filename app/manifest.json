@@ -50,5 +50,6 @@
       "update_url": "https://raw.githubusercontent.com/fasterize/fasterize-web-extension/master/app/update-manifest.json",
       "strict_min_version": "48.0"
     }
-  }
+  },
+  "web_accessible_resources" : ["show_deferjs_trace.js"]
 }

@@ -32,6 +32,7 @@
       <ul class="nav nav-tabs">
         <li class="active"><a href="#status-tab" data-toggle="tab">Status</a></li>
         <li><a href="#smartcache-tab" data-toggle="tab">SmartCache</a></li>
+        <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
         <li><a href="#info-tab" data-toggle="tab">Info</a></li>
       </ul>
       <div class="tab-content clearfix">
@@ -82,12 +83,6 @@
                   <button data-copy-id="cookie-fstrz" class="copy-button btn btn-primary octicon octicon-clippy" title="Copy"></button>
                 </div>
               </div>
-
-              <br />
-              <div>
-                <input class="btn btn-default" type="submit" value="Enable trace" id="enable-trace">
-                <input class="btn btn-default" type="submit" value="Disable trace" id="disable-trace">
-              </div>
             </form>
           </div>
         </div>
@@ -130,6 +125,13 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="tab-pane" id="advanced">
+          <button class="btn btn-default" id="show-deferjs-debug">Show DeferJS trace on devtools console</button>
+          <br/>
+          <br/>
+          <button class="btn btn-default" id="enable-trace">Enable trace</button>
+          <button class="btn btn-default" id="disable-trace">Disable trace</button>
         </div>
       </div>
     </section>
