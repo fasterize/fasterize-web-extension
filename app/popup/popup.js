@@ -184,6 +184,10 @@ function reloadPopup(tabID) {
       request.highlightFragments();
     });
 
+    $('#showLazyloadedImages').on('click', () => {
+      request.showLazyloadedImages();
+    });
+
     $('#getFragments').on('click', () => {
       request.getFragments().then(fragments => {
         fragments.forEach((fragment, index) => {

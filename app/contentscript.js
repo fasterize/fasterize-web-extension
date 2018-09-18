@@ -27,6 +27,12 @@ function getDeferjsDebug() {
   document.body.appendChild(s);
 }
 
+function addOverlayOnLazyloadedImages() {
+  var node = document.createElement('style');
+  node.innerHTML = 'img[data-lzled], img.lazyloaded { border: 3px solid #ff0090; box-sizing: border-box;}';
+  document.body.appendChild(node);
+}
+
 browser.runtime.onMessage.addListener((request, sender) => {
   switch (request.action) {
     case 'check_connection_info':
@@ -42,6 +48,9 @@ browser.runtime.onMessage.addListener((request, sender) => {
     case 'get_deferjs_debug':
       return Promise.resolve(getDeferjsDebug());
       break;
+    case 'show_lazyloaded_image':
+      addOverlayOnLazyloadedImages()
+      return Promise.resolve();
     default:
       return Promise.reject('unexpected message');
   }
