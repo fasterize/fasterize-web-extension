@@ -10,7 +10,7 @@ function determineConnectionInfo() {
 function highlightFragments() {
   const fragments = document.querySelectorAll('[data-fstrz-fragment-id]');
   fragments.forEach(f => {
-    f.style.border = '5px solid #fa9730';
+    f.style.border = '3px solid #fa9730';
   });
 }
 

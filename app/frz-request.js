@@ -22,7 +22,7 @@ class FRZRequest {
     this.preProcessHeaders();
   }
 
-  // convert the headers array into an object and upcase all names
+  // convert the headers array into an object and lowercase all names
   // (warning! will preserve only last of multiple headers with same name)
   preProcessHeaders() {
     this.headersRaw.forEach(function(header) {
@@ -151,7 +151,9 @@ class FRZRequest {
   }
 
   servedFromBrowserCache() {
-    return browser.loadTimes ? this.details.fromCache : false;
+    // there is no simple way to determine if this.details.fromCache implies that the response has been served from the
+    // browser cache or from a service worker
+    return false;
   }
 
   getTabID() {

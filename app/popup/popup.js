@@ -87,6 +87,8 @@ function reloadPopup(tabID) {
     const extensionWindow = browser.extension.getBackgroundPage();
     const request = extensionWindow.requests[tabID];
 
+    $('#smartcache-toggle').hide();
+
     if (request.headers['x-fstrz']) {
       const explanation = [];
       for (const flag in request.status) {
@@ -95,6 +97,9 @@ function reloadPopup(tabID) {
             flag
           ]}">${flag}</a>`
         );
+        if (flag === 'sc') {
+          $('#smartcache-toggle').show();
+        }
       }
       $('#x-fstrz-explanation').html(explanation.join(' '));
     } else {
@@ -113,7 +118,7 @@ function reloadPopup(tabID) {
     $('#cache-control').val(request.headers['cache-control']);
     $('#statusExplanation').text(request.computeExplanation());
     $('#protocol').text(request.getProtocol());
-    $('#statusCode').text(request.details.statusCode);
+    $('#statusCode').text(request.headers.status || request.details.statusCode);
     $('#pop').text(request.findPop());
     $('#ip').text(request.ip);
 
