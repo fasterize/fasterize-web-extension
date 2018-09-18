@@ -1,7 +1,10 @@
 /* those methods are executed in the context of the current tab */
 
 function determineConnectionInfo() {
-  return browser.loadTimes().connectionInfo;
+  if (window.PerformanceNavigationTiming) {
+    const ntEntry = performance.getEntriesByType('navigation')[0];
+    return ntEntry.nextHopProtocol;
+  }
 }
 
 function highlightFragments() {

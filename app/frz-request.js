@@ -10,15 +10,7 @@ class FRZRequest {
 
     // headers will be stored as name: value pairs (all names will be upper case)
     this.headers = {};
-
-    //handles FF & Chrome differently for getting connectionInfo
-    if (browser.loadTimes) {
-      this.hasConnectionInfo = false;
-    } else {
-      this.connectionType = this.details.statusLine.split(' ')[0];
-      this.connectionShortName = this.connectionType.includes('HTTP/2') ? 'h2' : '';
-      this.hasConnectionInfo = true;
-    }
+    this.hasConnectionInfo = false;
     this.optimized = false;
     this.cachedByFasterize = false;
     this.inProgress = false;
@@ -96,27 +88,23 @@ class FRZRequest {
   }
 
   queryConnectionInfoAndSetIcon() {
-    if (browser.loadTimes) {
-      const tabID = this.details.tabId;
-      if (this.hasConnectionInfo) {
-        this.setPageActionIconAndPopup();
-      } else {
-        browser.tabs
-          .sendMessage(this.details.tabId, { action: 'check_connection_info' })
-          .then(csMsgResponse => {
-            // stop and return if we don't get a response, happens with hidden/background tabs
-            if (typeof csMsgResponse === 'undefined') {
-              return;
-            }
-
-            const request = window.requests[tabID];
-            request.setConnectionInfo(csMsgResponse);
-            request.setPageActionIconAndPopup();
-          })
-          .catch(logError);
-      }
-    } else {
+    const tabID = this.details.tabId;
+    if (this.hasConnectionInfo) {
       this.setPageActionIconAndPopup();
+    } else {
+      browser.tabs
+        .sendMessage(this.details.tabId, { action: 'check_connection_info' })
+        .then(csMsgResponse => {
+          // stop and return if we don't get a response, happens with hidden/background tabs
+          if (typeof csMsgResponse === 'undefined') {
+            return;
+          }
+
+          const request = window.requests[tabID];
+          request.setConnectionInfo(csMsgResponse);
+          request.setPageActionIconAndPopup();
+        })
+        .catch(logError);
     }
   }
 
