@@ -7,7 +7,7 @@ function setFstrzCookie(url, value) {
   tmp.href = url;
 
   let rootDomain = `.${tmp.hostname.split('.').slice(-2).join('.')}`;
-  if (rootDomain === '.co.uk') {
+  if (rootDomain === '.co.uk' || rootDomain === '.com.tr') {
     rootDomain = `.${tmp.hostname.split('.').slice(-3).join('.')}`;
   }
 
