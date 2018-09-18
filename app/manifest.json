@@ -1,6 +1,6 @@
 {
   "name": "Fasterize Status",
-  "version": "2.1.6",
+  "version": "3.0.0",
   "manifest_version": 2,
   "description": "See detailed information on a fasterized page",
   "icons": {
@@ -51,5 +51,7 @@
       "strict_min_version": "48.0"
     }
   },
-  "web_accessible_resources" : ["show_deferjs_trace.js"]
+  "web_accessible_resources": [
+    "show_deferjs_trace.js"
+  ]
 }
