@@ -41,13 +41,13 @@ const appUpdateManifest = require(appUpdateManifestLocation);
 const key = Object.keys(appUpdateManifest.addons)[0];
 appUpdateManifest.addons[key].updates.push({
   version: version,
-  update_link: `https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an.fx.xpi`,
+  update_link: `https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an+fx.xpi`,
 });
 fs.writeFileSync(appUpdateManifestLocation, JSON.stringify(appUpdateManifest, null, 2));
 
 console.log('-> update README');
 let readme = fs.readFileSync('./README.md');
-readme = readme.toString().replace(/\[Firefox\]\(.*\)/, `[Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an.fx.xpi)`);
+readme = readme.toString().replace(/\[Firefox\]\(.*\)/, `[Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an+fx.xpi)`);
 fs.writeFileSync(readmeLocation, readme);
 
 console.log(`-> commit changes, tag with the version ${version}`);
