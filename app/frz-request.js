@@ -80,6 +80,8 @@ class FRZRequest {
         status = 'Error during optimization. See details in debug log.';
       } else if (this.inProgress) {
         status = 'The optimization is in progress but not completed yet.';
+      } else if (!this.headers['x-fstrz']) {
+        status = 'The page is from the origin because optimizations on HTTPS pages are disabled.';
       } else {
         status = 'The response has been retrieved on origin servers but has not been optimized by Fasterize.';
       }

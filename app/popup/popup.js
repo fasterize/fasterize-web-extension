@@ -102,8 +102,32 @@ function reloadPopup(tabID) {
         }
       }
       $('#x-fstrz-explanation').html(explanation.join(' '));
+
+      getFstrzCookie(request.details.url).then(fstrzCookie => {
+        if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
+          $('#fstrz-false').hide();
+        } else {
+          $('#fstrz-true').hide();
+        }
+
+        $('#cookie-fstrz').val(fstrzCookie && fstrzCookie.value);
+      }).catch(logError);
+
+      getFstrzVaryCookie(request.details.url).then(fstrzVaryCookie => {
+        $('#cookie-fstrz-vary').val(fstrzVaryCookie && fstrzVaryCookie.value);
+      }).catch(logError);
+
+      getDebugCookie(request.details.url).then(debugCookie => {
+        if (debugCookie && debugCookie.value === 'true') {
+          $('#enable-trace').hide();
+        } else {
+          $('#disable-trace').hide();
+        }
+      }).catch(logError);
+
     } else {
-      $('#x-fstrz-div').hide();
+      $('#section-middle').hide();
+      $('#section-bottom').hide();
     }
 
     if (request.pluggedToCDN()) {
@@ -122,27 +146,7 @@ function reloadPopup(tabID) {
     $('#pop').text(request.findPop());
     $('#ip').text(request.ip);
 
-    getFstrzCookie(request.details.url).then(fstrzCookie => {
-      if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
-        $('#fstrz-false').hide();
-      } else {
-        $('#fstrz-true').hide();
-      }
 
-      $('#cookie-fstrz').val(fstrzCookie && fstrzCookie.value);
-    }).catch(logError);
-
-    getFstrzVaryCookie(request.details.url).then(fstrzVaryCookie => {
-      $('#cookie-fstrz-vary').val(fstrzVaryCookie && fstrzVaryCookie.value);
-    }).catch(logError);
-
-    getDebugCookie(request.details.url).then(debugCookie => {
-      if (debugCookie && debugCookie.value === 'true') {
-        $('#enable-trace').hide();
-      } else {
-        $('#disable-trace').hide();
-      }
-    }).catch(logError);
 
     $('#fstrz-true').on('click', () => {
       setFstrzCookie(request.details.url, 'true').then(() => {
