@@ -53,5 +53,6 @@
   },
   "web_accessible_resources": [
     "show_deferjs_trace.js"
-  ]
+  ],
+  "incognito": "split"
 }
