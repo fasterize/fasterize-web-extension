@@ -65,7 +65,7 @@ console.log('-> publish on Chrome Web Store');
 childProcess.execSync('grunt');
 
 console.log('-> sign addon on Mozilla Addon Store');
-fsExtra.copy('app', 'tmp');
+fsExtra.copySync('app', 'tmp');
 const appManifestFirefox = require('./tmp/manifest.json');
 // incognito split is not allowed on firefox.
 delete appManifestFirefox.incognito;
