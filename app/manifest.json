@@ -1,6 +1,6 @@
 {
   "name": "Fasterize Status",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "manifest_version": 2,
   "description": "See detailed information on a fasterized page",
   "icons": {
