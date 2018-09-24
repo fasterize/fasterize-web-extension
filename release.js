@@ -22,6 +22,7 @@ node release.js {version}`);
 }
 
 const packageLocation = './package.json';
+const packageLockLocation = './package-lock.json';
 const appManifestLocation = './app/manifest.json';
 const appUpdateManifestLocation = './app/update-manifest.json';
 const readmeLocation = './README.md';
@@ -30,6 +31,11 @@ console.log('-> update package.json');
 const package = require(packageLocation);
 package.version = version;
 fs.writeFileSync(packageLocation, JSON.stringify(package, null, 2));
+
+console.log('-> update package-lock.json');
+const packageLock = require(packageLockLocation);
+packageLock.version = version;
+fs.writeFileSync(packageLockLocation, JSON.stringify(packageLock, null, 2));
 
 console.log('-> update manifest.json');
 const appManifest = require(appManifestLocation);

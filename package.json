@@ -20,10 +20,10 @@
   },
   "homepage": "https://github.com/fasterize/fasterize-web-extension#readme",
   "devDependencies": {
-    "grunt": "^1.0.1",
+    "grunt": "^1.0.3",
     "grunt-contrib-compress": "^1.3.0",
-    "grunt-webstore-upload": "^0.9.3",
+    "grunt-webstore-upload": "^0.9.22",
     "load-grunt-tasks": "^3.5.2",
-    "web-ext": "^1.10.0"
+    "web-ext": "^2.9.1"
   }
 }
