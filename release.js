@@ -1,6 +1,6 @@
 const fs = require('fs');
 const childProcess = require('child_process');
-
+const fsExtra = require('fs-extra');
 // update version
 const version = process.argv[2];
 
@@ -65,8 +65,14 @@ console.log('-> publish on Chrome Web Store');
 childProcess.execSync('grunt');
 
 console.log('-> sign addon on Mozilla Addon Store');
-childProcess.execSync('web-ext -a dist/firefox -s app build --overwrite-dest');
-childProcess.execSync(`web-ext -a dist/firefox -s app sign --api-key=${process.env['MOZILLA_API_KEY']} \
+fsExtra.copy('app', 'tmp');
+const appManifestFirefox = require('./tmp/manifest.json');
+// incognito split is not allowed on firefox.
+delete appManifestFirefox.incognito;
+fs.writeFileSync('./tmp/manifest.json', JSON.stringify(appManifestFirefox, null, 2));
+
+childProcess.execSync('web-ext -a dist/firefox -s tmp build --overwrite-dest');
+childProcess.execSync(`web-ext -a dist/firefox -s tmp sign --api-key=${process.env['MOZILLA_API_KEY']} \
   --api-secret=${process.env['MOZILLA_API_SECRET']}`);
 
 console.log('-> publish mozilla addon on Github releases');
