@@ -21,6 +21,7 @@ Load the `app` directory into chrome (go to chrome://extensions/ and click on "L
 You can also install [Extension Reloader](https://chrome.google.com/webstore/detail/extensions-reloader/fimgfedafeadlieiabdeeaodndnlbhid) to perform live-reloading.
 
 Debugging : go to `chrome://extensions`
+
 Reference is https://developer.chrome.com/extensions/tut_debugging
 
 ## Firefox
@@ -28,6 +29,7 @@ Reference is https://developer.chrome.com/extensions/tut_debugging
 This will launch a standalone firefox with the installed extension. The extension is compatible from Firefox 48.
 
 Debugging : go to `about:debugging#addons`.
+
 Reference is https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Debugging
 
 # Release
