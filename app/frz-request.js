@@ -16,6 +16,7 @@ class FRZRequest {
     this.inProgress = false;
     this.inError = false;
     this.cachedbyCDN = false;
+    this.headersHints = false;
     this.status = {};
     this.ip = details.ip
 
@@ -55,6 +56,9 @@ class FRZRequest {
       }
       if (cachedCodes.includes(code)) {
         this.cachedByFasterize = true;
+      }
+      if (headersHints.includes(code)) {
+        this.headersHints = true;
       }
     }
 
@@ -187,6 +191,8 @@ class FRZRequest {
         filename = 'error';
       } else if (this.inProgress) {
         filename = 'inProgress';
+      } else if (this.headersHints) {
+        filename = 'headersHints';
       } else if (this.servedByFasterize()) {
         filename = 'notOptimized';
       }
