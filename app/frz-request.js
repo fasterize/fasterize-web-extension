@@ -127,6 +127,13 @@ class FRZRequest {
 
   findPop() {
     const ip = this.details.ip;
+    if (this.headers['x-amz-cf-pop']) {
+      const cfPop = cloudfrontPOP[this.headers['x-amz-cf-pop']];
+      if (cfPop) {
+        return `CloudFront - ${cfPop['City']}, ${cfPop['Country']}`
+      }
+      return `CloudFront`;
+    }
     if (this.headers['server'] === 'keycdn-engine') {
       return `KeyCDN - ${keycdnPOP[this.headers['x-edge-location'].replace(/\d+/, '')]}`;
     } else if (this.servedByFasterize()) {
@@ -147,13 +154,14 @@ class FRZRequest {
 
   servedByCDN() {
     return (
+      (this.headers['x-amz-cf-pop'] && this.headers['x-cache'] === 'Hit from cloudfront') ||
       (this.headers['server'] === 'keycdn-engine' && this.headers['x-cache'] === 'HIT') ||
       this.headers['x-fstrz-cache'] === 'HIT'
     );
   }
 
   pluggedToCDN() {
-    return this.headers['server'] === 'keycdn-engine' || this.headers['x-fstrz-cache'] !== undefined;
+    return this.headers['server'] === 'keycdn-engine' || this.headers['x-fstrz-cache'] !== undefined || this.headers['x-amz-cf-pop'];
   }
 
   servedFromBrowserCache() {
