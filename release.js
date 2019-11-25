@@ -73,7 +73,7 @@ fs.writeFileSync('./tmp/manifest.json', JSON.stringify(appManifestFirefox, null,
 
 childProcess.execSync('web-ext -a dist/firefox -s tmp build --overwrite-dest');
 childProcess.execSync(`web-ext -a dist/firefox -s tmp sign --api-key=${process.env['MOZILLA_API_KEY']} \
-  --api-secret=${process.env['MOZILLA_API_SECRET']}`);
+  --api-secret=${process.env['MOZILLA_API_SECRET']} --timeout 600000`);
 
 console.log('-> publish mozilla addon on Github releases');
 childProcess.execSync(`hub release create -a dist/firefox/fasterize_status-${version}-an+fx.xpi -m "Release ${version}" ${version}`);
