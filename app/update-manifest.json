@@ -81,6 +81,10 @@
         {
           "version": "3.1.0",
           "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/3.1.0/fasterize_status-3.1.0-an+fx.xpi"
+        },
+        {
+          "version": "3.2.5",
+          "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/3.2.5/fasterize_status-3.2.5-an+fx.xpi"
         }
       ]
     }
