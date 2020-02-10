@@ -1,99 +1,156 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fasterize Status</title>
-  <link rel="stylesheet" href="../vendor/bootstrap.css">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="../vendor/octicons.min.css">
-</head>
-<body>
-  <div class="content">
-    <section id="section-top">
-      <h3><strong id="protocol"></strong> <strong id="statusCode"></strong></h3><span id="statusExplanation"></span>
-    </section>
-    <section id="section-middle">
-      <div class="row">
-        <div class="col-xs-4">
-          <input class="btn btn-primary" type="submit" value="See optimized pages" id="fstrz-true">
-          <input class="btn btn-primary" type="submit" value="See unoptimized pages" id="fstrz-false">
-        </div>
-        <div class="col-xs-8">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" id="disable-fasterize-cache" style="display:block!important"/> Bypass Fasterize cache for pages
-            </label>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fasterize Status</title>
+    <link rel="stylesheet" href="../vendor/bootstrap.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../vendor/octicons.min.css" />
+  </head>
+  <body>
+    <div class="content">
+      <section id="section-top">
+        <h3>
+          <strong id="protocol"></strong> <strong id="statusCode"></strong>
+        </h3>
+        <span id="statusExplanation"></span>
+      </section>
+      <section id="section-middle">
+        <div class="row">
+          <div class="col-xs-4">
+            <input
+              class="btn btn-primary"
+              type="submit"
+              value="See optimized pages"
+              id="fstrz-true"
+            />
+            <input
+              class="btn btn-primary"
+              type="submit"
+              value="See unoptimized pages"
+              id="fstrz-false"
+            />
+          </div>
+          <div class="col-xs-8">
+            <div class="checkbox">
+              <label>
+                <input
+                  type="checkbox"
+                  id="disable-fasterize-cache"
+                  style="display:block!important"
+                />
+                Bypass Fasterize cache for pages
+              </label>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-    <section id="section-bottom">
-      <ul class="nav nav-tabs">
-        <li class="active"><a href="#status-tab" data-toggle="tab">Status</a></li>
-        <li><a id="smartcache-toggle" href="#smartcache-tab" data-toggle="tab">SmartCache</a></li>
-        <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
-        <li><a href="#info-tab" data-toggle="tab">Info</a></li>
-      </ul>
-      <div class="tab-content clearfix">
-        <div class="tab-pane active" id="status-tab">
-          Edge location : <span id="pop"></span> (<span id="ip"></span>)
-          <div class="form-group">
-            <div id="x-fstrz-div">
-              <p>The <code style="color:#154364">x-fstrz</code> header is <span id="x-fstrz-explanation"></span></p>
+      </section>
+      <section id="section-bottom">
+        <ul class="nav nav-tabs">
+          <li class="active">
+            <a href="#status-tab" data-toggle="tab">Status</a>
+          </li>
+          <li>
+            <a id="smartcache-toggle" href="#smartcache-tab" data-toggle="tab"
+              >SmartCache</a
+            >
+          </li>
+          <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
+          <li><a href="#info-tab" data-toggle="tab">Info</a></li>
+        </ul>
+        <div class="tab-content clearfix">
+          <div class="tab-pane active" id="status-tab">
+            Edge location : <span id="pop"></span> (<span id="ip"></span>)
+            <div class="form-group">
+              <div id="x-fstrz-div">
+                <p>
+                  The <code style="color:#154364">x-fstrz</code> header is
+                  <span id="x-fstrz-explanation"></span>
+                </p>
+              </div>
+              <div id="cdn_div">
+                <p>CDN Cache Status is <span id="cdn_status"></span></p>
+              </div>
+              <form class="form-inline" id="debug">
+                <div class="input-group" id="x-unique-id-div">
+                  <div class="input-group-addon" style="width: 120px">
+                    x-unique-id
+                  </div>
+                  <input id="x-unique-id" class="form-control" type="text" />
+                  <div class="input-group-btn">
+                    <button
+                      data-copy-id="x-unique-id"
+                      class="copy-button btn btn-primary octicon octicon-clippy"
+                      title="Copy"
+                    ></button>
+                  </div>
+                </div>
+                <br />
+
+                <div class="input-group">
+                  <div class="input-group-addon" style="width: 120px">
+                    Cache-Control
+                  </div>
+                  <input id="cache-control" class="form-control" type="text" />
+                  <div class="input-group-btn">
+                    <button
+                      data-copy-id="cache-control"
+                      class="copy-button btn btn-primary octicon octicon-clippy"
+                      title="Copy"
+                    ></button>
+                  </div>
+                </div>
+                <br />
+
+                <div class="input-group">
+                  <div class="input-group-addon" style="width: 120px">
+                    Cookie fstrz
+                  </div>
+                  <input id="cookie-fstrz" class="form-control" type="text" />
+                  <div class="input-group-btn">
+                    <button
+                      data-copy-id="cookie-fstrz"
+                      class="copy-button btn btn-primary octicon octicon-clippy"
+                      title="Copy"
+                    ></button>
+                  </div>
+                </div>
+
+                <br />
+
+                <div class="input-group">
+                  <div class="input-group-addon" style="width: 120px">
+                    Cookie fstrz_vary
+                  </div>
+                  <input
+                    id="cookie-fstrz-vary"
+                    class="form-control"
+                    type="text"
+                  />
+                  <div class="input-group-btn">
+                    <button
+                      data-copy-id="cookie-fstrz"
+                      class="copy-button btn btn-primary octicon octicon-clippy"
+                      title="Copy"
+                    ></button>
+                  </div>
+                </div>
+              </form>
             </div>
-            <div id="cdn_div">
-              <p>CDN Cache Status is <span id="cdn_status"></span></p>
-            </div>
-            <form class="form-inline" id="debug">
-
-
-              <div class="input-group" id="x-unique-id-div">
-                <div class="input-group-addon" style="width: 120px">x-unique-id</div>
-                <input id="x-unique-id" class="form-control" type="text">
-                <div class="input-group-btn">
-                  <button data-copy-id="x-unique-id" class="copy-button btn btn-primary octicon octicon-clippy" title="Copy"></button>
-                </div>
-              </div>
-              <br />
-
-              <div class="input-group">
-                <div class="input-group-addon" style="width: 120px">Cache-Control</div>
-                <input id="cache-control" class="form-control" type="text">
-                <div class="input-group-btn">
-                  <button data-copy-id="cache-control" class="copy-button btn btn-primary octicon octicon-clippy" title="Copy"></button>
-                </div>
-              </div>
-              <br />
-
-              <div class="input-group">
-                <div class="input-group-addon" style="width: 120px">Cookie fstrz</div>
-                <input id="cookie-fstrz" class="form-control" type="text">
-                <div class="input-group-btn">
-                  <button data-copy-id="cookie-fstrz" class="copy-button btn btn-primary octicon octicon-clippy" title="Copy"></button>
-                </div>
-              </div>
-
-              <br />
-
-              <div class="input-group">
-                <div class="input-group-addon" style="width: 120px">Cookie fstrz_vary</div>
-                <input id="cookie-fstrz-vary" class="form-control" type="text">
-                <div class="input-group-btn">
-                  <button data-copy-id="cookie-fstrz" class="copy-button btn btn-primary octicon octicon-clippy" title="Copy"></button>
-                </div>
-              </div>
-            </form>
           </div>
-        </div>
-        <div class="tab-pane" id="smartcache-tab">
-          <button class="btn btn-default" id="highlightFragments">Highlight dynamic areas</button>
-          <button class="btn btn-default" id="getFragments">Show dynamic areas source code</button>
-          <br />
-          <div id="fragments_div"></div>
-        </div>
-        <div class="tab-pane" id="info-tab">
-          <table class="table">
+          <div class="tab-pane" id="smartcache-tab">
+            <button class="btn btn-default" id="highlightFragments">
+              Highlight dynamic areas
+            </button>
+            <button class="btn btn-default" id="getFragments">
+              Show dynamic areas source code
+            </button>
+            <br />
+            <div id="fragments_div"></div>
+          </div>
+          <div class="tab-pane" id="info-tab">
+            <!-- <table class="table">
             <tbody>
               <tr>
                 <td><img src="/icons/indicator/cachedByBrowser.svg" /></td>
@@ -128,24 +185,40 @@
                 <td>The red bullet means that the connection is over HTTP/2.</td>
               </tr>
             </tbody>
-          </table>
+          </table> -->
+          </div>
+          <div class="tab-pane" id="advanced">
+            <button class="btn btn-default" id="showLazyloadedImages">
+              Highlight lazyloaded images
+            </button>
+            <br />
+            <br />
+            <button class="btn btn-default" id="show-deferjs-debug">
+              Show DeferJS trace on devtools console
+            </button>
+            <br />
+            <br />
+            <button class="btn btn-default" id="enable-trace">
+              Enable trace
+            </button>
+            <button class="btn btn-default" id="disable-trace">
+              Disable trace
+            </button>
+          </div>
         </div>
-        <div class="tab-pane" id="advanced">
-          <button class="btn btn-default" id="showLazyloadedImages">Highlight lazyloaded images</button>
-          <br/>
-          <br/>
-          <button class="btn btn-default" id="show-deferjs-debug">Show DeferJS trace on devtools console</button>
-          <br/>
-          <br/>
-          <button class="btn btn-default" id="enable-trace">Enable trace</button>
-          <button class="btn btn-default" id="disable-trace">Disable trace</button>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script src="../vendor/browser-polyfill.js" type="text/javascript"></script>
-  <script src="../vendor/jquery-3.3.1.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="../vendor/bootstrap.js" type="text/javascript" charset="utf-8"></script>
-  <script src="popup.js" type="text/javascript" charset="utf-8"></script>
-</body>
+      </section>
+    </div>
+    <script src="../vendor/browser-polyfill.js" type="text/javascript"></script>
+    <script
+      src="../vendor/jquery-3.3.1.min.js"
+      type="text/javascript"
+      charset="utf-8"
+    ></script>
+    <script
+      src="../vendor/bootstrap.js"
+      type="text/javascript"
+      charset="utf-8"
+    ></script>
+    <script src="popup.js" type="text/javascript" charset="utf-8"></script>
+  </body>
 </html>
