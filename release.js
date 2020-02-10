@@ -71,8 +71,8 @@ const appManifestFirefox = require('./tmp/manifest.json');
 delete appManifestFirefox.incognito;
 fs.writeFileSync('./tmp/manifest.json', JSON.stringify(appManifestFirefox, null, 2));
 
-childProcess.execSync('web-ext -a dist/firefox -s tmp build --overwrite-dest');
-childProcess.execSync(`web-ext -a dist/firefox -s tmp sign --api-key=${process.env['MOZILLA_API_KEY']} \
+childProcess.execSync('npx web-ext -a dist/firefox -s tmp build --overwrite-dest');
+childProcess.execSync(`npx web-ext -a dist/firefox -s tmp sign --api-key=${process.env['MOZILLA_API_KEY']} \
   --api-secret=${process.env['MOZILLA_API_SECRET']} --timeout 600000`);
 
 console.log('-> publish mozilla addon on Github releases');
