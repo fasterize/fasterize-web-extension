@@ -207,7 +207,7 @@ class FRZRequest {
     }
 
     filename += this.hasConnectionInfo && this.connectionShortName === 'h2' ? 'h2' : '';
-    filename += '.svg';
+    filename += '.png';
     return basePath + filename;
   }
 
