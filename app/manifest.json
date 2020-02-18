@@ -1,6 +1,6 @@
 {
   "name": "Fasterize Status",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "manifest_version": 2,
   "description": "See detailed information on a fasterized page",
   "icons": {
@@ -32,8 +32,13 @@
   ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["vendor/browser-polyfill.js", "contentscript.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "vendor/browser-polyfill.js",
+        "contentscript.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -44,6 +49,8 @@
       "strict_min_version": "48.0"
     }
   },
-  "web_accessible_resources": ["show_deferjs_trace.js"],
+  "web_accessible_resources": [
+    "show_deferjs_trace.js"
+  ],
   "incognito": "split"
 }
