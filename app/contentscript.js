@@ -1,12 +1,5 @@
 /* those methods are executed in the context of the current tab */
 
-function determineConnectionInfo() {
-  if (window.PerformanceNavigationTiming) {
-    const ntEntry = performance.getEntriesByType('navigation')[0];
-    return ntEntry.nextHopProtocol;
-  }
-}
-
 function highlightFragments() {
   const fragments = document.querySelectorAll('[data-fstrz-fragment-id]');
   fragments.forEach(f => {
@@ -35,9 +28,6 @@ function addOverlayOnLazyloadedImages() {
 
 browser.runtime.onMessage.addListener((request, sender) => {
   switch (request.action) {
-    case 'check_connection_info':
-      return Promise.resolve(determineConnectionInfo());
-      break;
     case 'highlight_fragments':
       highlightFragments();
       return Promise.resolve();

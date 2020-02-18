@@ -10,7 +10,6 @@ class FRZRequest {
 
     // headers will be stored as name: value pairs (all names will be upper case)
     this.headers = {};
-    this.hasConnectionInfo = false;
     this.optimized = false;
     this.cachedByFasterize = false;
     this.inProgress = false;
@@ -93,33 +92,6 @@ class FRZRequest {
     return status;
   }
 
-  queryConnectionInfoAndSetIcon() {
-    const tabID = this.details.tabId;
-    if (this.hasConnectionInfo) {
-      this.setPageActionIconAndPopup();
-    } else {
-      browser.tabs
-        .sendMessage(this.details.tabId, { action: 'check_connection_info' })
-        .then(csMsgResponse => {
-          // stop and return if we don't get a response, happens with hidden/background tabs
-          if (typeof csMsgResponse === 'undefined') {
-            return;
-          }
-
-          const request = window.requests[tabID];
-          request.setConnectionInfo(csMsgResponse);
-          request.setPageActionIconAndPopup();
-        })
-        .catch(logError);
-    }
-  }
-
-  setConnectionInfo(connectionInfo) {
-    this.hasConnectionInfo = true;
-    this.connectionType = connectionInfo;
-    this.connectionShortName = this.connectionType;
-    this.connectionType = this.connectionShortName == '' ? 'HTTP/1.1' : 'HTTP/2';
-  }
 
   servedByFasterize() {
     return 'x-fstrz' in this.headers || frzIP.includes(this.details.ip);
@@ -206,7 +178,6 @@ class FRZRequest {
       }
     }
 
-    filename += this.hasConnectionInfo && this.connectionShortName === 'h2' ? 'h2' : '';
     filename += '.png';
     return basePath + filename;
   }

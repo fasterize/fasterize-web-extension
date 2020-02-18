@@ -22,27 +22,19 @@
     ]
   },
   "permissions": [
-    "webNavigation",
     "webRequest",
     "webRequestBlocking",
-    "clipboardWrite",
     "tabs",
     "cookies",
     "storage",
-    "<all_urls>",
     "http://*/*",
     "https://*/*"
   ],
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "vendor/browser-polyfill.js",
-        "contentscript.js"
-      ],
-      "run_at": "document_start"
+      "matches": ["<all_urls>"],
+      "js": ["vendor/browser-polyfill.js", "contentscript.js"],
+      "run_at": "document_idle"
     }
   ],
   "applications": {
@@ -52,8 +44,6 @@
       "strict_min_version": "48.0"
     }
   },
-  "web_accessible_resources": [
-    "show_deferjs_trace.js"
-  ],
+  "web_accessible_resources": ["show_deferjs_trace.js"],
   "incognito": "split"
 }

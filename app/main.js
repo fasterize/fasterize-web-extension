@@ -6,10 +6,13 @@ window.requests = {};
 const processCompletedRequest = details => {
   const request = new FRZRequest(details);
   window.requests[details.tabId] = request;
+  setTimeout(() => {
+    request.setPageActionIconAndPopup();
+  }, 300);
 };
 
 const filter = {
-  urls: ['<all_urls>'],
+  urls: ['http://*/*', 'https://*/*'],
   types: ['main_frame'],
 };
 
@@ -46,18 +49,6 @@ browser.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
     delete window.requests[removedTabId];
   } else {
     console.log('Could not find an entry in window.requests when replacing ', removedTabId);
-  }
-});
-
-browser.webNavigation.onDOMContentLoaded.addListener(details => {
-  if (details.frameId > 0) {
-    // we don't care about sub-frame window.requests
-    return;
-  }
-
-  if (details.tabId in window.requests) {
-    const request = window.requests[details.tabId];
-    request.queryConnectionInfoAndSetIcon();
   }
 });
 

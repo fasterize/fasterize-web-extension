@@ -141,7 +141,6 @@ function reloadPopup(tabID) {
     $('#x-unique-id').val(request.headers['x-unique-id']);
     $('#cache-control').val(request.headers['cache-control']);
     $('#statusExplanation').text(request.computeExplanation());
-    $('#protocol').text(request.getProtocol());
     $('#statusCode').text(request.headers.status || request.details.statusCode);
     $('#pop').text(request.findPop());
     $('#ip').text(request.ip);
