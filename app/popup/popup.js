@@ -203,41 +203,27 @@ function reloadPopup(tabID) {
     function toggleFlag(featureFlagName) {
       var toggle = true;
       toggle = document.getElementById(featureFlagName).checked;
-      if (toggle == false) {
-        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
-          let url = tabs[0].url.split('?')
-          let base = url[0];
-          let params = url.length > 1 ? url[1] : null
 
+      browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
+        let url = tabs[0].url.split('?')
+        let base = url[0];
+        let params = url.length > 1 ? url[1] : null
+        if (!toggle) {
           m_dict = this.getParamsDict(featureFlagName, false)
-          p_dict = {}
-          if (params != null) {
-            p_dict = this.getParamsDict(params);
-          }
-
-          params = { ...p_dict, ...m_dict };
-          params = this.convertObjectToUrlString(params)
-          newUrl = base + params
-          browser.tabs.update(tabID, { url: newUrl })
-        });
-      }
-      else if (toggle == true) {
-        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
-          let url = tabs[0].url.split('?')
-          let base = url[0];
-          let params = url.length > 1 ? url[1] : null
-
+        }
+        else {
           m_dict = this.getParamsDict(featureFlagName, true)
-          p_dict = {}
-          if (params != null) {
-            p_dict = this.getParamsDict(params);
-          }
-          params = { ...p_dict, ...m_dict };
-          params = this.convertObjectToUrlString(params)
-          newUrl = base + params
-          browser.tabs.update(tabID, { url: newUrl })
-        });
-      }
+        }
+        p_dict = {}
+        if (params != null) {
+          p_dict = this.getParamsDict(params);
+        }
+
+        params = { ...p_dict, ...m_dict };
+        params = this.convertObjectToUrlString(params)
+        newUrl = base + params
+        browser.tabs.update(tabID, { url: newUrl })
+      });
     }
 
     convertObjectToUrlString = (obj) => {
@@ -252,7 +238,7 @@ function reloadPopup(tabID) {
     }
 
     function replaceUrl(p_string, p_value, pvalueOrNot) {
-      
+
     }
 
     getParamsDict = (p_string, p_value) => {
@@ -274,58 +260,58 @@ function reloadPopup(tabID) {
       showTab();
     });
 
-    function showTab() {
-      browser.tabs.query({ active: true }).then(tabs => {
-        let url = tabs[0].url.split('?')
-        if (url.length > 1) {
-          url = url[1].split('&');
-          let params = [];
+  function showTab() {
+    browser.tabs.query({ active: true }).then(tabs => {
+      let url = tabs[0].url.split('?')
+      if (url.length > 1) {
+        url = url[1].split('&');
+        let params = [];
 
-          for (i = 0; i < url.length; i++) {
-            params.push(url[i].split('='));
+        for (i = 0; i < url.length; i++) {
+          params.push(url[i].split('='));
+        }
+
+        for (j = 0; j < params.length; j++) {
+          if (params[j][1] == 'true') {
+            document.getElementById(params[j][0]).setAttribute("checked", true);
           }
-
-          for (j = 0; j < params.length; j++) {
-            if (params[j][1] == 'true') {
-              document.getElementById(params[j][0]).setAttribute("checked", true);
-            }
-            else if(params[j][1] == 'false') {
-              //$("#" + params[j]).removeAttr("checked");
-              document.getElementById(params[j][0]).setAttribute("checked", false);
-            }
+          else if (params[j][1] == 'false') {
+            //$("#" + params[j]).removeAttr("checked");
+            document.getElementById(params[j][0]).setAttribute("checked", false);
           }
         }
-      });
-    };
-
-    $('#getFragments').on('click', () => {
-      request.getFragments().then(fragments => {
-        fragments.forEach((fragment, index) => {
-          const code = document.createElement('code');
-          code.classList.add('html');
-          const h3 = document.createElement('h3');
-          const pre = document.createElement('pre');
-          code.innerText = fragment;
-          pre.appendChild(code);
-
-          h3.innerText = `#${index + 1}`;
-          document.getElementById('fragments_div').appendChild(h3);
-          document.getElementById('fragments_div').appendChild(pre);
-        });
-      });
+      }
     });
+  };
 
-    browser.storage.local.get('disable-fasterize-cache').then(res => {
-      $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
-    }).catch(logError);
+  $('#getFragments').on('click', () => {
+    request.getFragments().then(fragments => {
+      fragments.forEach((fragment, index) => {
+        const code = document.createElement('code');
+        code.classList.add('html');
+        const h3 = document.createElement('h3');
+        const pre = document.createElement('pre');
+        code.innerText = fragment;
+        pre.appendChild(code);
 
-    $('#disable-fasterize-cache').change(function () {
-      browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
-      browser.runtime.sendMessage({ action: 'update-settings', 'disable-fasterize-cache': this.checked }).catch(logError);
-    });
-
-    $('#show-deferjs-debug').on('click', () => {
-      request.getDeferjsDebug();
+        h3.innerText = `#${index + 1}`;
+        document.getElementById('fragments_div').appendChild(h3);
+        document.getElementById('fragments_div').appendChild(pre);
+      });
     });
   });
-})();
+
+  browser.storage.local.get('disable-fasterize-cache').then(res => {
+    $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
+  }).catch(logError);
+
+  $('#disable-fasterize-cache').change(function () {
+    browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
+    browser.runtime.sendMessage({ action: 'update-settings', 'disable-fasterize-cache': this.checked }).catch(logError);
+  });
+
+  $('#show-deferjs-debug').on('click', () => {
+    request.getDeferjsDebug();
+  });
+});
+}) ();
