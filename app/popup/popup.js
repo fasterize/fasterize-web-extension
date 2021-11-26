@@ -194,22 +194,22 @@ function reloadPopup(tabID) {
       request.showLazyloadedImages();
     });
 
-    document.getElementById("parent-list").addEventListener("click", function (e) {
+    document.getElementById("feature-flag-table").addEventListener("click", function (e) {
       if (e.target && e.target.nodeName == "INPUT") {
-        jeclique(e.target.id);
+        toggleFlag(e.target.id);
       }
     });
-    
-    function jeclique(cookieName) {
+
+    function toggleFlag(featureFlagName) {
       var toggle = true;
-      toggle = document.getElementById(cookieName).checked;
+      toggle = document.getElementById(featureFlagName).checked;
       if (toggle == false) {
         browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
           let url = tabs[0].url.split('?')
           let base = url[0];
           let params = url.length > 1 ? url[1] : null
 
-          m_dict = this.getParamsDict(cookieName, false)
+          m_dict = this.getParamsDict(featureFlagName, false)
           p_dict = {}
           if (params != null) {
             p_dict = this.getParamsDict(params);
@@ -227,7 +227,7 @@ function reloadPopup(tabID) {
           let base = url[0];
           let params = url.length > 1 ? url[1] : null
 
-          m_dict = this.getParamsDict(cookieName, true)
+          m_dict = this.getParamsDict(featureFlagName, true)
           p_dict = {}
           if (params != null) {
             p_dict = this.getParamsDict(params);
@@ -251,33 +251,30 @@ function reloadPopup(tabID) {
       return url;
     }
 
+    function replaceUrl(p_string, p_value, pvalueOrNot) {
+      
+    }
+
     getParamsDict = (p_string, p_value) => {
-      if (p_value == false || p_value == true) {
-        let params = p_string.replace('?', '').split("&");
-        let p_dict = {}
-        for (let i = 0; i < params.length; i++) {
-          let param = params[i].split("=")
+      let params = p_string.replace('?', '').split("&");
+      let p_dict = {}
+      for (let i = 0; i < params.length; i++) {
+        let param = params[i].split("=")
+        if (p_value == false || p_value == true) {
           p_dict[param[0]] = p_value
         }
-        return p_dict;
-      }
-      else {
-        let params = p_string.replace('?', '').split("&");
-        let p_dict = {}
-        for (let i = 0; i < params.length; i++) {
-          let param = params[i].split("=")
+        else {
           p_dict[param[0]] = param[1]
         }
-        return p_dict;
       }
+      return p_dict;
     }
 
     document.getElementById("ongletCookies").addEventListener("click", function (e) {
-	//$("#ongletCookies").click(function () {
-      afficherOnglet();
+      showTab();
     });
 
-    function afficherOnglet() {
+    function showTab() {
       browser.tabs.query({ active: true }).then(tabs => {
         let url = tabs[0].url.split('?')
         if (url.length > 1) {
@@ -292,8 +289,9 @@ function reloadPopup(tabID) {
             if (params[j][1] == 'true') {
               document.getElementById(params[j][0]).setAttribute("checked", true);
             }
-            else {
-              $("#" + params[j]).removeAttr("checked");
+            else if(params[j][1] == 'false') {
+              //$("#" + params[j]).removeAttr("checked");
+              document.getElementById(params[j][0]).setAttribute("checked", false);
             }
           }
         }
