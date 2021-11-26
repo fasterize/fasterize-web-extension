@@ -94,7 +94,7 @@ function reloadPopup(tabID) {
       for (const flag in request.status) {
         explanation.push(
           `<a class="btn btn-default" data-toggle="tooltip" data-placement="top" title="${request.status[
-            flag
+          flag
           ]}">${flag}</a>`
         );
         if (flag === 'sc') {
@@ -141,11 +141,9 @@ function reloadPopup(tabID) {
     $('#x-unique-id').val(request.headers['x-unique-id']);
     $('#cache-control').val(request.headers['cache-control']);
     $('#statusExplanation').text(request.computeExplanation());
-    $('#statusCode').text(request.headers.status || request.details.statusCode);
+    $('#statusCode').text(request.headers.status || request.details.statusCode);
     $('#pop').text(request.findPop());
     $('#ip').text(request.ip);
-
-
 
     $('#fstrz-true').on('click', () => {
       setFstrzCookie(request.details.url, 'true').then(() => {
@@ -175,7 +173,7 @@ function reloadPopup(tabID) {
       });
     });
 
-    $('.copy-button').on('click', function(evt) {
+    $('.copy-button').on('click', function (evt) {
       const $el = $(this);
       const copyId = $el.data('copyId');
       const $copyEl = $(`#${copyId}`);
@@ -195,6 +193,112 @@ function reloadPopup(tabID) {
     $('#showLazyloadedImages').on('click', () => {
       request.showLazyloadedImages();
     });
+
+    document.getElementById("parent-list").addEventListener("click", function (e) {
+      if (e.target && e.target.nodeName == "INPUT") {
+        jeclique(e.target.id);
+      }
+    });
+    
+    function jeclique(cookieName) {
+      var toggle = true;
+      toggle = document.getElementById(cookieName).checked;
+      if (toggle == false) {
+        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
+          let url = tabs[0].url.split('?')
+          let base = url[0];
+          let params = url.length > 1 ? url[1] : null
+
+          m_dict = this.getParamsDict(cookieName, false)
+          p_dict = {}
+          if (params != null) {
+            p_dict = this.getParamsDict(params);
+          }
+
+          params = { ...p_dict, ...m_dict };
+          params = this.convertObjectToUrlString(params)
+          newUrl = base + params
+          browser.tabs.update(tabID, { url: newUrl })
+        });
+      }
+      else if (toggle == true) {
+        browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
+          let url = tabs[0].url.split('?')
+          let base = url[0];
+          let params = url.length > 1 ? url[1] : null
+
+          m_dict = this.getParamsDict(cookieName, true)
+          p_dict = {}
+          if (params != null) {
+            p_dict = this.getParamsDict(params);
+          }
+          params = { ...p_dict, ...m_dict };
+          params = this.convertObjectToUrlString(params)
+          newUrl = base + params
+          browser.tabs.update(tabID, { url: newUrl })
+        });
+      }
+    }
+
+    convertObjectToUrlString = (obj) => {
+      let url = "?"
+      for (let [key, value] of Object.entries(obj)) {
+        url += `${key}=${value}&`;
+      }
+      if (url.length > 1) {
+        url = url.substr(0, url.length - 1);
+      }
+      return url;
+    }
+
+    getParamsDict = (p_string, p_value) => {
+      if (p_value == false || p_value == true) {
+        let params = p_string.replace('?', '').split("&");
+        let p_dict = {}
+        for (let i = 0; i < params.length; i++) {
+          let param = params[i].split("=")
+          p_dict[param[0]] = p_value
+        }
+        return p_dict;
+      }
+      else {
+        let params = p_string.replace('?', '').split("&");
+        let p_dict = {}
+        for (let i = 0; i < params.length; i++) {
+          let param = params[i].split("=")
+          p_dict[param[0]] = param[1]
+        }
+        return p_dict;
+      }
+    }
+
+    document.getElementById("ongletCookies").addEventListener("click", function (e) {
+	//$("#ongletCookies").click(function () {
+      afficherOnglet();
+    });
+
+    function afficherOnglet() {
+      browser.tabs.query({ active: true }).then(tabs => {
+        let url = tabs[0].url.split('?')
+        if (url.length > 1) {
+          url = url[1].split('&');
+          let params = [];
+
+          for (i = 0; i < url.length; i++) {
+            params.push(url[i].split('='));
+          }
+
+          for (j = 0; j < params.length; j++) {
+            if (params[j][1] == 'true') {
+              document.getElementById(params[j][0]).setAttribute("checked", true);
+            }
+            else {
+              $("#" + params[j]).removeAttr("checked");
+            }
+          }
+        }
+      });
+    };
 
     $('#getFragments').on('click', () => {
       request.getFragments().then(fragments => {
@@ -217,7 +321,7 @@ function reloadPopup(tabID) {
       $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
     }).catch(logError);
 
-    $('#disable-fasterize-cache').change(function() {
+    $('#disable-fasterize-cache').change(function () {
       browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
       browser.runtime.sendMessage({ action: 'update-settings', 'disable-fasterize-cache': this.checked }).catch(logError);
     });
