@@ -56,6 +56,7 @@
           </li>
           <li><a href="#advanced" data-toggle="tab">Advanced</a></li>
           <li><a href="#info-tab" data-toggle="tab">Info</a></li>
+          <li><a href="#testscookies" data-toggle="tab" id="ongletCookies">Testing</a></li>
         </ul>
         <div class="tab-content clearfix">
           <div class="tab-pane active" id="status-tab">
@@ -203,6 +204,60 @@
               Disable trace
             </button>
           </div>
+          <div class="tab-pane" id="testscookies">
+            <table width="100%" cellspacing="1" cellpadding="5" id="feature-flag-table">
+              <tr>
+                <td>Defer JS<br /><label class="switch" title="frz-deferjs">
+                    <input type="checkbox" id="frz-deferjs">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>Image lazyloading<br /><label class="switch" title="frz-lazyload">
+                    <input type="checkbox" id="frz-lazyload">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+              <tr>
+                <td>CSS on top<br /><label class="switch" title="frz-cssontop">
+                    <input type="checkbox" id="frz-cssontop">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>HTML minification<br /><label class="switch" title="frz-minifyhtml">
+                    <input type="checkbox" id="frz-minifyhtml">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+              <tr>
+                <td>CSS concatenation<br /><label class="switch" title="frz-concatcss">
+                    <input type="checkbox" id="frz-concatcss">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>CSS minification<br /><label class="switch" title="frz-minifycss">
+                    <input type="checkbox" id="frz-minifycss">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+              <tr>
+                <td>JS concatenation<br /><label class="switch" title="frz-concatjs">
+                    <input type="checkbox" id="frz-concatjs">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>JS minification<br /><label class="switch" title="frz-minifyjs">
+                    <input type="checkbox" id="frz-minifyjs">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+              <tr>
+                <td>Preload<br /><label class="switch" title="frz-preloading">
+                    <input type="checkbox" id="frz-preloading">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>Unsharding<br /><label class="switch" title="frz-unsharding">
+                    <input type="checkbox" id="frz-unsharding">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+            </table>
+            <table></table>
         </div>
       </section>
     </div>

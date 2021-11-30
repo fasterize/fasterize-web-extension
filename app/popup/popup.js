@@ -94,7 +94,7 @@ function reloadPopup(tabID) {
       for (const flag in request.status) {
         explanation.push(
           `<a class="btn btn-default" data-toggle="tooltip" data-placement="top" title="${request.status[
-            flag
+          flag
           ]}">${flag}</a>`
         );
         if (flag === 'sc') {
@@ -141,11 +141,9 @@ function reloadPopup(tabID) {
     $('#x-unique-id').val(request.headers['x-unique-id']);
     $('#cache-control').val(request.headers['cache-control']);
     $('#statusExplanation').text(request.computeExplanation());
-    $('#statusCode').text(request.headers.status || request.details.statusCode);
+    $('#statusCode').text(request.headers.status || request.details.statusCode);
     $('#pop').text(request.findPop());
     $('#ip').text(request.ip);
-
-
 
     $('#fstrz-true').on('click', () => {
       setFstrzCookie(request.details.url, 'true').then(() => {
@@ -175,7 +173,7 @@ function reloadPopup(tabID) {
       });
     });
 
-    $('.copy-button').on('click', function(evt) {
+    $('.copy-button').on('click', function (evt) {
       const $el = $(this);
       const copyId = $el.data('copyId');
       const $copyEl = $(`#${copyId}`);
@@ -196,34 +194,124 @@ function reloadPopup(tabID) {
       request.showLazyloadedImages();
     });
 
-    $('#getFragments').on('click', () => {
-      request.getFragments().then(fragments => {
-        fragments.forEach((fragment, index) => {
-          const code = document.createElement('code');
-          code.classList.add('html');
-          const h3 = document.createElement('h3');
-          const pre = document.createElement('pre');
-          code.innerText = fragment;
-          pre.appendChild(code);
+    document.getElementById("feature-flag-table").addEventListener("click", function (e) {
+      if (e.target && e.target.nodeName == "INPUT") {
+        toggleFlag(e.target.id);
+      }
+    });
 
-          h3.innerText = `#${index + 1}`;
-          document.getElementById('fragments_div').appendChild(h3);
-          document.getElementById('fragments_div').appendChild(pre);
-        });
+    function toggleFlag(featureFlagName) {
+      var toggle = true;
+      toggle = document.getElementById(featureFlagName).checked;
+
+      browser.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
+        let url = tabs[0].url.split('?')
+        let base = url[0];
+        let params = url.length > 1 ? url[1] : null
+        if (!toggle) {
+          m_dict = this.getParamsDict(featureFlagName, false)
+        }
+        else {
+          m_dict = this.getParamsDict(featureFlagName, true)
+        }
+        p_dict = {}
+        if (params != null) {
+          p_dict = this.getParamsDict(params);
+        }
+
+        params = { ...p_dict, ...m_dict };
+        params = this.convertObjectToUrlString(params)
+        newUrl = base + params
+        browser.tabs.update(tabID, { url: newUrl })
+      });
+    }
+
+    convertObjectToUrlString = (obj) => {
+      let url = "?"
+      for (let [key, value] of Object.entries(obj)) {
+        url += `${key}=${value}&`;
+      }
+      if (url.length > 1) {
+        url = url.substr(0, url.length - 1);
+      }
+      return url;
+    }
+
+    function replaceUrl(p_string, p_value, pvalueOrNot) {
+
+    }
+
+    getParamsDict = (p_string, p_value) => {
+      let params = p_string.replace('?', '').split("&");
+      let p_dict = {}
+      for (let i = 0; i < params.length; i++) {
+        let param = params[i].split("=")
+        if (p_value == false || p_value == true) {
+          p_dict[param[0]] = p_value
+        }
+        else {
+          p_dict[param[0]] = param[1]
+        }
+      }
+      return p_dict;
+    }
+
+    document.getElementById("ongletCookies").addEventListener("click", function (e) {
+      showTab();
+    });
+
+  function showTab() {
+    browser.tabs.query({ active: true }).then(tabs => {
+      let url = tabs[0].url.split('?')
+      if (url.length > 1) {
+        url = url[1].split('&');
+        let params = [];
+
+        for (i = 0; i < url.length; i++) {
+          params.push(url[i].split('='));
+        }
+
+        for (j = 0; j < params.length; j++) {
+          if (params[j][1] == 'true') {
+            document.getElementById(params[j][0]).setAttribute("checked", true);
+          }
+          else if (params[j][1] == 'false') {
+            //$("#" + params[j]).removeAttr("checked");
+            document.getElementById(params[j][0]).setAttribute("checked", false);
+          }
+        }
+      }
+    });
+  };
+
+  $('#getFragments').on('click', () => {
+    request.getFragments().then(fragments => {
+      fragments.forEach((fragment, index) => {
+        const code = document.createElement('code');
+        code.classList.add('html');
+        const h3 = document.createElement('h3');
+        const pre = document.createElement('pre');
+        code.innerText = fragment;
+        pre.appendChild(code);
+
+        h3.innerText = `#${index + 1}`;
+        document.getElementById('fragments_div').appendChild(h3);
+        document.getElementById('fragments_div').appendChild(pre);
       });
     });
-
-    browser.storage.local.get('disable-fasterize-cache').then(res => {
-      $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
-    }).catch(logError);
-
-    $('#disable-fasterize-cache').change(function() {
-      browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
-      browser.runtime.sendMessage({ action: 'update-settings', 'disable-fasterize-cache': this.checked }).catch(logError);
-    });
-
-    $('#show-deferjs-debug').on('click', () => {
-      request.getDeferjsDebug();
-    });
   });
-})();
+
+  browser.storage.local.get('disable-fasterize-cache').then(res => {
+    $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
+  }).catch(logError);
+
+  $('#disable-fasterize-cache').change(function () {
+    browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
+    browser.runtime.sendMessage({ action: 'update-settings', 'disable-fasterize-cache': this.checked }).catch(logError);
+  });
+
+  $('#show-deferjs-debug').on('click', () => {
+    request.getDeferjsDebug();
+  });
+});
+}) ();
