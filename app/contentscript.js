@@ -24,6 +24,8 @@ function addOverlayOnLazyloadedImages() {
   var node = document.createElement('style');
   node.innerHTML = 'img[data-lzled], img.lazyloaded { border: 3px solid #ff0090; box-sizing: border-box;}';
   document.body.appendChild(node);
+function getFeatureFlag() {
+  return document.body.dataset['frzFlags']
 }
 
 browser.runtime.onMessage.addListener((request, sender) => {
@@ -38,6 +40,9 @@ browser.runtime.onMessage.addListener((request, sender) => {
     case 'get_deferjs_debug':
       return Promise.resolve(getDeferjsDebug());
       break;
+    case 'get_flags':
+      return Promise.resolve(getFeatureFlag())
+      break
     case 'show_lazyloaded_image':
       addOverlayOnLazyloadedImages()
       return Promise.resolve();

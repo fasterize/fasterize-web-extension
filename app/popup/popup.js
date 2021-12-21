@@ -88,6 +88,9 @@ function reloadPopup(tabID) {
     const request = extensionWindow.requests[tabID];
 
     $('#smartcache-toggle').hide();
+    request.getFeatureFlag().then(flags => {
+      console.log(JSON.parse(flags))
+    })
 
     if (request.headers['x-fstrz']) {
       const explanation = [];

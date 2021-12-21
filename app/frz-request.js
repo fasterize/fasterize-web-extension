@@ -231,6 +231,10 @@ class FRZRequest {
 
   getDeferjsDebug() {
     return browser.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch(logError);
+  getFeatureFlag() {
+    return browser.tabs
+      .sendMessage(this.details.tabId, { action: 'get_flags' })
+      .catch(logError)
   }
 
   showLazyloadedImages() {
