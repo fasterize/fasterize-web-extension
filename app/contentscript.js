@@ -26,6 +26,10 @@ function addOverlayOnLazyloadedImages() {
   document.body.appendChild(node);
 }
 
+function getFrzFlags() {
+  return document.body.dataset.frzFlags && JSON.parse(document.body.dataset.frzFlags);
+}
+
 browser.runtime.onMessage.addListener((request, sender) => {
   switch (request.action) {
     case 'highlight_fragments':
@@ -41,6 +45,9 @@ browser.runtime.onMessage.addListener((request, sender) => {
     case 'show_lazyloaded_image':
       addOverlayOnLazyloadedImages()
       return Promise.resolve();
+    case 'get_frz_flags':
+      return Promise.resolve(getFrzFlags());
+      break;
     default:
       return Promise.reject('unexpected message');
   }

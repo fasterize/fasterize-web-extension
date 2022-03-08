@@ -207,52 +207,52 @@
           <div class="tab-pane" id="testscookies">
             <table width="100%" cellspacing="1" cellpadding="5" id="feature-flag-table">
               <tr>
-                <td>Defer JS<br /><label class="switch" title="frz-deferjs">
-                    <input type="checkbox" id="frz-deferjs">
+                <td>Defer JS<br /><label class="switch" for="deferjs">
+                    <input type="checkbox" id="deferjs" data-flag="frz-deferjs">
                     <span class="slider round"></span>
                   </label></td>
-                <td>Image lazyloading<br /><label class="switch" title="frz-lazyload">
-                    <input type="checkbox" id="frz-lazyload">
-                    <span class="slider round"></span>
-                  </label></td>
-              </tr>
-              <tr>
-                <td>CSS on top<br /><label class="switch" title="frz-cssontop">
-                    <input type="checkbox" id="frz-cssontop">
-                    <span class="slider round"></span>
-                  </label></td>
-                <td>HTML minification<br /><label class="switch" title="frz-minifyhtml">
-                    <input type="checkbox" id="frz-minifyhtml">
+                <td>Image lazyloading<br /><label class="switch" for="lazyload">
+                    <input type="checkbox" id="lazyload" data-flag="frz-lazyload">
                     <span class="slider round"></span>
                   </label></td>
               </tr>
               <tr>
-                <td>CSS concatenation<br /><label class="switch" title="frz-concatcss">
-                    <input type="checkbox" id="frz-concatcss">
+                <td>CSS on top<br /><label class="switch" for="cssontop">
+                    <input type="checkbox" id="cssontop" data-flag="frz-cssontop">
                     <span class="slider round"></span>
                   </label></td>
-                <td>CSS minification<br /><label class="switch" title="frz-minifycss">
-                    <input type="checkbox" id="frz-minifycss">
-                    <span class="slider round"></span>
-                  </label></td>
-              </tr>
-              <tr>
-                <td>JS concatenation<br /><label class="switch" title="frz-concatjs">
-                    <input type="checkbox" id="frz-concatjs">
-                    <span class="slider round"></span>
-                  </label></td>
-                <td>JS minification<br /><label class="switch" title="frz-minifyjs">
-                    <input type="checkbox" id="frz-minifyjs">
+                <td>HTML minification<br /><label class="switch" for="minifyhtml">
+                    <input type="checkbox" id="minifyhtml" data-flag="frz-minifyhtml">
                     <span class="slider round"></span>
                   </label></td>
               </tr>
               <tr>
-                <td>Preload<br /><label class="switch" title="frz-preloading">
-                    <input type="checkbox" id="frz-preloading">
+                <td>CSS concatenation<br /><label class="switch" for="concatcss">
+                    <input type="checkbox" id="concatcss" data-flag="frz-concatcss">
                     <span class="slider round"></span>
                   </label></td>
-                <td>Unsharding<br /><label class="switch" title="frz-unsharding">
-                    <input type="checkbox" id="frz-unsharding">
+                <td>CSS minification<br /><label class="switch" for="minifycss">
+                    <input type="checkbox" id="minifycss" data-flag="frz-persist-minifycss">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+              <tr>
+                <td>JS concatenation<br /><label class="switch" for="concatjs">
+                    <input type="checkbox" id="concatjs" data-flag="frz-concatjs">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>JS minification<br /><label class="switch" for="minifyjs">
+                    <input type="checkbox" id="minifyjs" data-flag="frz-persist-minifyjs">
+                    <span class="slider round"></span>
+                  </label></td>
+              </tr>
+              <tr>
+                <td>Preload<br /><label class="switch" for="preloading">
+                    <input type="checkbox" id="preloading" data-flag="frz-preloading">
+                    <span class="slider round"></span>
+                  </label></td>
+                <td>Unsharding<br /><label class="switch" for="unsharding">
+                    <input type="checkbox" id="unsharding" data-flag="frz-unsharding">
                     <span class="slider round"></span>
                   </label></td>
               </tr>
