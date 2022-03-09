@@ -17,7 +17,7 @@ class FRZRequest {
     this.cachedbyCDN = false;
     this.headersHints = false;
     this.status = {};
-    this.ip = details.ip
+    this.ip = details.ip;
 
     this.preProcessHeaders();
   }
@@ -92,7 +92,6 @@ class FRZRequest {
     return status;
   }
 
-
   servedByFasterize() {
     return 'x-fstrz' in this.headers || frzIP.includes(this.details.ip);
   }
@@ -102,9 +101,12 @@ class FRZRequest {
     if (this.headers['x-amz-cf-pop']) {
       const cfPop = cloudfrontPOP[this.headers['x-amz-cf-pop']];
       if (cfPop) {
-        return `CloudFront - ${cfPop['City']}, ${cfPop['Country']}`
+        return `CloudFront - ${cfPop['City']}, ${cfPop['Country']}`;
       }
       return `CloudFront`;
+    }
+    if (this.pluggedToFastly()) {
+      return `Fastly - ${this.headers['x-served-by']}`;
     }
     if (this.headers['server'] === 'keycdn-engine') {
       return `KeyCDN - ${keycdnPOP[this.headers['x-edge-location'].replace(/\d+/, '')]}`;
@@ -128,12 +130,27 @@ class FRZRequest {
     return (
       (this.headers['x-amz-cf-pop'] && this.headers['x-cache'] === 'Hit from cloudfront') ||
       (this.headers['server'] === 'keycdn-engine' && this.headers['x-cache'] === 'HIT') ||
+      (this.pluggedToFastly() && this.headers['x-cache'] === 'HIT') ||
       this.headers['x-fstrz-cache'] === 'HIT'
     );
   }
 
+  pluggedToFastly() {
+    return (
+      this.headers['server'] === 'fasterize' &&
+      this.headers['x-served-by'] &&
+      this.headers['x-timer'] &&
+      this.headers['x-served-by'].startsWith('cache-')
+    );
+  }
+
   pluggedToCDN() {
-    return this.headers['server'] === 'keycdn-engine' || this.headers['x-fstrz-cache'] !== undefined || this.headers['x-amz-cf-pop'];
+    return (
+      this.headers['server'] === 'keycdn-engine' ||
+      this.headers['x-fstrz-cache'] !== undefined ||
+      this.headers['x-amz-cf-pop'] ||
+      this.pluggedToFastly()
+    );
   }
 
   servedFromBrowserCache() {
@@ -224,9 +241,7 @@ class FRZRequest {
   }
 
   getFragments() {
-    return browser.tabs
-      .sendMessage(this.details.tabId, { action: 'get_fragments' })
-      .catch(logError);
+    return browser.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch(logError);
   }
 
   getDeferjsDebug() {
