@@ -64,7 +64,7 @@
             <div class="form-group">
               <div id="x-fstrz-div">
                 <p>
-                  The <code style="color:#154364">x-fstrz</code> header is
+                  The <code style="color:#154364">x-fstrz</code> status is
                   <span id="x-fstrz-explanation"></span>
                 </p>
               </div>
@@ -74,7 +74,7 @@
               <form class="form-inline" id="debug">
                 <div class="input-group" id="x-unique-id-div">
                   <div class="input-group-addon" style="width: 120px">
-                    x-unique-id
+                    Request ID
                   </div>
                   <input id="x-unique-id" class="form-control" type="text" />
                   <div class="input-group-btn">
@@ -149,42 +149,38 @@
             <div id="fragments_div"></div>
           </div>
           <div class="tab-pane" id="info-tab">
-            <!-- <table class="table">
+            <table class="table">
             <tbody>
               <tr>
-                <td><img src="/icons/indicator/cachedByBrowser.svg" /></td>
+                <td><img src="/icons/indicator/cachedByBrowser.png" /></td>
                 <td>The page is served from the Fasterize cache or CDN cache</td>
               </tr>
               <tr>
-                <td><img src="/icons/indicator/optimizedByFasterize.svg" /></td>
+                <td><img src="/icons/indicator/optimizedByFasterize.png" /></td>
                 <td>The page is optimized</td>
               </tr>
               <tr>
-                <td><img src="/icons/indicator/inProgress.svg" /></td>
+                <td><img src="/icons/indicator/inProgress.png" /></td>
                 <td>The optimization is in progress. The page is not fully optimized</td>
               </tr>
               <tr>
-                <td><img src="/icons/indicator/notOptimized.svg" /></td>
+                <td><img src="/icons/indicator/notOptimized.png" /></td>
                 <td>The page is not optimizable</td>
               </tr>
               <tr>
-                <td><img src="/icons/indicator/error.svg" /></td>
+                <td><img src="/icons/indicator/error.png" /></td>
                 <td>The optimization fails</td>
               </tr>
               <tr>
-                <td><img src="/icons/indicator/headersHints.svg" /></td>
+                <td><img src="/icons/indicator/headersHints.png" /></td>
                 <td>Some assets are preloaded</td>
               </tr>
               <tr>
-                <td><img src="/icons/indicator/noFasterize.svg" /></td>
+                <td><img src="/icons/indicator/noFasterize.png" /></td>
                 <td>Site doesn't use Fasterize (what a shame!)</td>
               </tr>
-              <tr>
-                <td><img src="/icons/indicator/noFasterizeh2.svg" /></td>
-                <td>The red bullet means that the connection is over HTTP/2.</td>
-              </tr>
             </tbody>
-          </table> -->
+          </table>
           </div>
           <div class="tab-pane" id="advanced">
             <button class="btn btn-default" id="showLazyloadedImages">
@@ -198,10 +194,10 @@
             <br />
             <br />
             <button class="btn btn-default" id="enable-trace">
-              Enable trace
+              Enable debug
             </button>
             <button class="btn btn-default" id="disable-trace">
-              Disable trace
+              Disable debug
             </button>
           </div>
           <div class="tab-pane" id="testscookies">
