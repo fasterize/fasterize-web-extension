@@ -43,7 +43,7 @@ browser.runtime.onMessage.addListener((request, sender) => {
       return Promise.resolve(getDeferjsDebug());
       break;
     case 'show_lazyloaded_image':
-      addOverlayOnLazyloadedImages()
+      addOverlayOnLazyloadedImages();
       return Promise.resolve();
     case 'get_frz_flags':
       return Promise.resolve(getFrzFlags());
