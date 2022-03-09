@@ -143,11 +143,15 @@ function reloadPopup(tabID) {
         })
         .catch(logError)
 
-      request.getFrzFlags().then(flags => {
-        for (flag in flags) {
-          document.getElementById(flag).checked = flags[flag]
-        }
-      })
+      request
+        .getFrzFlags()
+        .then(flags => {
+          for (flag in flags) {
+            document.getElementById(flag).checked = flags[flag]
+          }
+          $('#testscookies table').show()
+        })
+        .catch(logError)
     } else {
       $('#section-middle').hide()
       $('#section-bottom').hide()
@@ -231,63 +235,37 @@ function reloadPopup(tabID) {
       })
 
     function toggleFlag(featureFlagName) {
-      var toggle = true
-      toggle = document.getElementById(featureFlagName).checked
-      flagName = document.getElementById(featureFlagName).dataset.flag
+      const toggle = document.getElementById(featureFlagName).checked,
+        flagName = document.getElementById(featureFlagName).dataset.flag
 
       const url = new URL(tabs[0].url)
       const params = url.searchParams
       params.set(flagName, toggle)
-      browser.tabs.update(tabID, { url: url.toString() })
-    }
+      const newUrl = url.toString()
 
-    document
-      .getElementById('ongletCookies')
-      .addEventListener('click', function(e) {
-        showTab()
+      browser.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
+        return reloadPopup(tabID)
       })
 
-    function showTab() {
-      browser.tabs.query({ active: true }).then(tabs => {
-        let url = tabs[0].url.split('?')
-        if (url.length > 1) {
-          url = url[1].split('&')
-          let params = []
-
-          for (i = 0; i < url.length; i++) {
-            params.push(url[i].split('='))
-          }
-
-          for (j = 0; j < params.length; j++) {
-            if (params[j][1] == 'true') {
-              document
-                .getElementById(params[j][0])
-                .setAttribute('checked', true)
-            } else if (params[j][1] == 'false') {
-              //$("#" + params[j]).removeAttr("checked");
-              document
-                .getElementById(params[j][0])
-                .setAttribute('checked', false)
-            }
-          }
-        }
-      })
+      browser.tabs.update(tabID, { url: newUrl }).catch(logError)
     }
 
     $('#getFragments').on('click', () => {
       request.getFragments().then(fragments => {
-        fragments.forEach((fragment, index) => {
-          const code = document.createElement('code')
-          code.classList.add('html')
-          const h3 = document.createElement('h3')
-          const pre = document.createElement('pre')
-          code.innerText = fragment
-          pre.appendChild(code)
+        fragments &&
+          fragments.forEach((fragment, index) => {
+            const code = document.createElement('code')
+            code.classList.add('html')
+            const h3 = document.createElement('h3')
+            const pre = document.createElement('pre')
+            code.innerText = fragment
+            pre.appendChild(code)
 
-          h3.innerText = `#${index + 1}`
-          document.getElementById('fragments_div').appendChild(h3)
-          document.getElementById('fragments_div').appendChild(pre)
-        })
+            const re = /data-fstrz-fragment-selector="([^"]*)"/
+            h3.innerText = `${index + 1} - ${re.exec(fragment)[1]}`
+            document.getElementById('fragments_div').appendChild(h3)
+            document.getElementById('fragments_div').appendChild(pre)
+          })
       })
     })
 
