@@ -25,6 +25,10 @@ Debugging : go to `chrome://extensions`
 
 Reference is https://developer.chrome.com/extensions/tut_debugging
 
+The developper dashboard is https://chrome.google.com/webstore/devconsole/d47c0dfe-54f9-41c3-a785-e868a9854aa6
+https://console.cloud.google.com/apis/credentials?project=extension-chrome-344315&supportedpurview=project
+https://developer.chrome.com/docs/webstore/using_webstore_api/
+
 ## Firefox
 
 This will launch a standalone firefox with the installed extension. The extension is compatible from Firefox 48.

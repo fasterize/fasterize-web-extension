@@ -77,11 +77,15 @@ const appManifestFirefox = require('./tmp/manifest.json');
 delete appManifestFirefox.incognito;
 fs.writeFileSync('./tmp/manifest.json', JSON.stringify(appManifestFirefox, null, 2));
 
-childProcess.execSync('npx web-ext -a dist/firefox -s tmp build --overwrite-dest');
-childProcess.execSync(`npx web-ext -a dist/firefox -s tmp sign --api-key=${process.env['MOZILLA_API_KEY']} \
-  --api-secret=${process.env['MOZILLA_API_SECRET']} --timeout 600000`);
+childProcess.execSync('npx web-ext -a dist/firefox -s tmp build --overwrite-dest', { stdio: 'inherit' });
+childProcess.execSync(
+  `npx web-ext -a dist/firefox -s tmp sign --api-key=${process.env['MOZILLA_API_KEY']} \
+  --api-secret=${process.env['MOZILLA_API_SECRET']} --timeout 600000`,
+  { stdio: 'inherit' }
+);
 
 console.log('-> publish mozilla addon on Github releases');
 childProcess.execSync(
-  `hub release create -a dist/firefox/fasterize_status-${version}-an+fx.xpi -m "Release ${version}" ${version}`
+  `hub release create -a dist/firefox/fasterize_status-${version}-an+fx.xpi -m "Release ${version}" ${version}`,
+  { stdio: 'inherit' }
 );
