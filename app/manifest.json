@@ -1,6 +1,6 @@
 {
   "name": "Fasterize Status",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "manifest_version": 2,
   "description": "See detailed information on a fasterized page",
   "icons": {
@@ -14,13 +14,31 @@
     "default_icon": "icons/store/icon.png"
   },
   "background": {
-    "scripts": ["vendor/browser-polyfill.js", "mapping.js", "frz-request.js", "main.js"]
+    "scripts": [
+      "vendor/browser-polyfill.js",
+      "mapping.js",
+      "frz-request.js",
+      "main.js"
+    ]
   },
-  "permissions": ["webRequest", "webRequestBlocking", "tabs", "cookies", "storage", "http://*/*", "https://*/*"],
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "tabs",
+    "cookies",
+    "storage",
+    "http://*/*",
+    "https://*/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["vendor/browser-polyfill.js", "contentscript.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "vendor/browser-polyfill.js",
+        "contentscript.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -31,6 +49,8 @@
       "strict_min_version": "48.0"
     }
   },
-  "web_accessible_resources": ["show_deferjs_trace.js"],
+  "web_accessible_resources": [
+    "show_deferjs_trace.js"
+  ],
   "incognito": "spanning"
 }
