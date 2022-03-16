@@ -68,7 +68,7 @@ childProcess.execSync(`git tag ${version}`);
 childProcess.execSync(`git push origin --tags && git push`);
 
 console.log('-> publish on Chrome Web Store');
-childProcess.execSync('grunt');
+childProcess.execSync('grunt', { stdio: 'inherit' });
 
 console.log('-> sign addon on Mozilla Addon Store');
 fsExtra.copySync('app', 'tmp');
