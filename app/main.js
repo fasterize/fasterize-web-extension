@@ -34,6 +34,7 @@ browser.webRequest.onBeforeSendHeaders.addListener(
         name: 'Cache-Control',
         value: 'no-fstrz-cache',
       });
+      details.requestHeaders.push({ name: 'X-Frz-Nocache', value: Date.now().toString() });
     }
     return { requestHeaders: details.requestHeaders };
   },
