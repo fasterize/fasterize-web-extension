@@ -236,16 +236,19 @@ function reloadPopup(tabID) {
 
     function toggleFlag(featureFlagName) {
       const toggle = document.getElementById(featureFlagName).checked,
-        flagName = document.getElementById(featureFlagName).dataset.flag
+        flagName = document.getElementById(featureFlagName).dataset.flag;
 
-      const url = new URL(tabs[0].url)
-      const params = url.searchParams
-      params.set(flagName, toggle)
-      const newUrl = url.toString()
+      const url = new URL(tabs[0].url);
+      const params = url.searchParams;
+      params.set(flagName, toggle);
+      const newUrl = url.toString();
 
-      browser.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
-        return reloadPopup(tabID)
-      })
+      // chrome doesn't reload the popup by itself, firefox reload the popup
+      if (navigator.userAgent.includes('Chrome')) {
+        browser.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
+          return reloadPopup(tabID);
+        });
+      }
 
       browser.tabs.update(tabID, { url: newUrl }).catch(logError)
     }
