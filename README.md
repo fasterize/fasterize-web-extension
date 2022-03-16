@@ -9,7 +9,7 @@ Chrome and Firefox web extension for Fasterize
 
 # Install
 
-- [Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/3.4.1/fasterize_status-3.4.1-an+fx.xpi)
+- [Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/3.4.2/fasterize_status-3.4.2-an+fx.xpi)
 - [Chrome](https://chrome.google.com/webstore/detail/fasterize-status/pophpmnchlcddhhilmnopbahlaohdfig)
 
 # Dev
@@ -35,7 +35,7 @@ Reference is https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Debugging
 
 # Release
 
-You need to have `hub` installed to do the release.
+You need to have `hub` installed to do the release and grunt `npm install -g grunt`
 
 On OSX, just run `brew install hub`. On Ubuntu :
 
