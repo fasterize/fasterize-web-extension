@@ -4,12 +4,13 @@ const fsExtra = require('fs-extra');
 // update version
 const version = process.argv[2];
 
-if ( !version
-  || !process.env['MOZILLA_API_KEY']
-  || !process.env['MOZILLA_API_SECRET']
-  || !process.env['CHROME_WEBSTORE_ID']
-  || !process.env['CHROME_WEBSTORE_SECRET']
-  || !process.env['CHROME_WEBSTORE_REFRESH']
+if (
+  !version ||
+  !process.env['MOZILLA_API_KEY'] ||
+  !process.env['MOZILLA_API_SECRET'] ||
+  !process.env['CHROME_WEBSTORE_ID'] ||
+  !process.env['CHROME_WEBSTORE_SECRET'] ||
+  !process.env['CHROME_WEBSTORE_REFRESH']
 ) {
   console.log(`
 Usage: MOZILLA_API_KEY=X \
@@ -53,7 +54,12 @@ fs.writeFileSync(appUpdateManifestLocation, JSON.stringify(appUpdateManifest, nu
 
 console.log('-> update README');
 let readme = fs.readFileSync('./README.md');
-readme = readme.toString().replace(/\[Firefox\]\(.*\)/, `[Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an+fx.xpi)`);
+readme = readme
+  .toString()
+  .replace(
+    /\[Firefox\]\(.*\)/,
+    `[Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an+fx.xpi)`
+  );
 fs.writeFileSync(readmeLocation, readme);
 
 console.log(`-> commit changes, tag with the version ${version}`);
@@ -62,7 +68,7 @@ childProcess.execSync(`git tag ${version}`);
 childProcess.execSync(`git push origin --tags && git push`);
 
 console.log('-> publish on Chrome Web Store');
-childProcess.execSync('grunt');
+childProcess.execSync('npx grunt');
 
 console.log('-> sign addon on Mozilla Addon Store');
 fsExtra.copySync('app', 'tmp');
@@ -76,4 +82,6 @@ childProcess.execSync(`npx web-ext -a dist/firefox -s tmp sign --api-key=${proce
   --api-secret=${process.env['MOZILLA_API_SECRET']} --timeout 600000`);
 
 console.log('-> publish mozilla addon on Github releases');
-childProcess.execSync(`hub release create -a dist/firefox/fasterize_status-${version}-an+fx.xpi -m "Release ${version}" ${version}`);
+childProcess.execSync(
+  `hub release create -a dist/firefox/fasterize_status-${version}-an+fx.xpi -m "Release ${version}" ${version}`
+);
