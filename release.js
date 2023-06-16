@@ -48,7 +48,7 @@ const appUpdateManifest = require(appUpdateManifestLocation);
 const key = Object.keys(appUpdateManifest.addons)[0];
 appUpdateManifest.addons[key].updates.push({
   version: version,
-  update_link: `https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an+fx.xpi`,
+  update_link: `https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}.xpi`,
 });
 fs.writeFileSync(appUpdateManifestLocation, JSON.stringify(appUpdateManifest, null, 2));
 
@@ -58,7 +58,7 @@ readme = readme
   .toString()
   .replace(
     /\[Firefox\]\(.*\)/,
-    `[Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}-an+fx.xpi)`
+    `[Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/${version}/fasterize_status-${version}.xpi)`
   );
 fs.writeFileSync(readmeLocation, readme);
 
@@ -86,6 +86,6 @@ childProcess.execSync(
 
 console.log('-> publish mozilla addon on Github releases');
 childProcess.execSync(
-  `hub release create -a dist/firefox/fasterize_status-${version}-an+fx.xpi -m "Release ${version}" ${version}`,
+  `hub release create -a dist/firefox/fasterize_status-${version}.xpi -m "Release ${version}" ${version}`,
   { stdio: 'inherit' }
 );
