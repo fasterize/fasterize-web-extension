@@ -3,20 +3,25 @@ function logError(e) {
   console.log(browser.runtime.lastError, e);
 }
 
+function getRootDomain(tmp) {
+  let rootDomain = `.${tmp.hostname
+      .split('.')
+      .slice(-2)
+      .join('.')}`;
+  if (rootDomain === '.co.uk' || rootDomain === '.com.tr') {
+    rootDomain = `.${tmp.hostname
+        .split('.')
+        .slice(-3)
+        .join('.')}`;
+  }
+  return rootDomain;
+}
+
 function setFstrzCookie(url, value) {
   const tmp = document.createElement('a');
   tmp.href = url;
 
-  let rootDomain = `.${tmp.hostname
-    .split('.')
-    .slice(-2)
-    .join('.')}`;
-  if (rootDomain === '.co.uk' || rootDomain === '.com.tr') {
-    rootDomain = `.${tmp.hostname
-      .split('.')
-      .slice(-3)
-      .join('.')}`;
-  }
+  const rootDomain = getRootDomain(tmp);
 
   return Promise.all([
     browser.cookies.set({
@@ -34,12 +39,36 @@ function setFstrzCookie(url, value) {
   ]);
 }
 
+function setOptimizationCookie(cookieName, url, value) {
+  const tmp = document.createElement('a');
+  tmp.href = url;
+
+  const rootDomain = getRootDomain(tmp);
+  return Promise.all([
+    browser.cookies.set({
+      url: tmp.origin,
+      domain: rootDomain,
+      name: cookieName,
+      value,
+    }),
+  ]);
+}
+
 function getFstrzCookie(url) {
   const tmp = document.createElement('a');
   tmp.href = url;
   return browser.cookies.get({
     url: tmp.origin,
     name: 'fstrz',
+  });
+}
+
+function getOptimizationCookie(cookieName, url) {
+  const tmp = document.createElement('a');
+  tmp.href = url;
+  return browser.cookies.get({
+    url: tmp.origin,
+    name: cookieName,
   });
 }
 
@@ -81,7 +110,6 @@ function reloadPopup(tabID) {
     .then(() => window.close())
     .catch(logError);
 }
-
 (() => {
   /* global $ */
   // get the current tab's ID and extract request info
@@ -117,6 +145,7 @@ function reloadPopup(tabID) {
         .then(fstrzCookie => {
           if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
             $('#fstrz-false').hide();
+            $('#optimized_options').hide();
           } else {
             $('#fstrz-true').hide();
           }
@@ -124,6 +153,26 @@ function reloadPopup(tabID) {
           $('#cookie-fstrz').val(fstrzCookie && fstrzCookie.value);
         })
         .catch(logError);
+
+      getOptimizationCookie('frz-optimize-edge-speed', request.details.url)
+          .then(optimizationCookie => {
+            if ((optimizationCookie && optimizationCookie.value === 'false') || (request.headers['x-frz-optimize-edge-speed'] && request.headers['x-frz-optimize-edge-speed'].indexOf('Z') >= 0)) {
+              $('#fstrz-edge-speed').prop("checked", false);
+            } else {
+              $('#fstrz-edge-speed').prop("checked", true);
+            }
+          })
+          .catch(logError);
+
+      getOptimizationCookie('frz-optimize-edge-seo', request.details.url)
+          .then(optimizationCookie => {
+            if ((optimizationCookie && optimizationCookie.value === 'false') || (request.headers['x-frz-optimize-edge-seo'] && request.headers['x-frz-optimize-edge-seo'].indexOf('Z') >= 0)) {
+              $('#fstrz-edge-seo').prop("checked", false);
+            } else {
+              $('#fstrz-edge-seo').prop("checked", true);
+            }
+          })
+          .catch(logError);
 
       getFstrzVaryCookie(request.details.url)
         .then(fstrzVaryCookie => {
@@ -187,6 +236,24 @@ function reloadPopup(tabID) {
           return reloadPopup(tabID);
         })
         .catch(logError);
+    });
+
+    $('#fstrz-edge-speed').on('click', () => {
+      const checked = $('#fstrz-edge-speed').prop('checked').toString();
+      setOptimizationCookie('frz-optimize-edge-speed', request.details.url, checked)
+          .then(() => {
+            return reloadPopup(tabID);
+          })
+          .catch(logError);
+    });
+
+    $('#fstrz-edge-seo').on('click', () => {
+      const checked = $('#fstrz-edge-seo').prop('checked').toString();
+      setOptimizationCookie('frz-optimize-edge-seo', request.details.url, checked)
+          .then(() => {
+            return reloadPopup(tabID);
+          })
+          .catch(logError);
     });
 
     $('#enable-trace').on('click', () => {

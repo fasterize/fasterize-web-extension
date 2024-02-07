@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run dev:firefox",
     "lint": "web-ext -s app lint -i vendor/*",
-    "dev": "web-ext -a dist/firefox -s app run --url http://www.fasterize.com",
+    "dev": "web-ext -a dist/firefox -s app run -v --browser-console --url http://www.fasterize.com",
     "release": "node release.js"
   },
   "repository": {
@@ -30,6 +30,6 @@
     "grunt-webstore-upload": "^0.9.22",
     "load-grunt-tasks": "^3.5.2",
     "prettier": "^1.14.3",
-    "web-ext": "6.7.0"
+    "web-ext": "7.11.0"
   }
 }
