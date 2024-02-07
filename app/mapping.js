@@ -1,4 +1,4 @@
-var optimizedCodes = ['o'];
+var optimizedCodes = ['o', 'pl'];
 var inProgressCodes = ['w'];
 var errorCodes = ['e', 't', 'vf', '!id', '!conf', 'b', 'ed', 'cbo'];
 var cachedCodes = ['c', 'clc', 'sc'];
