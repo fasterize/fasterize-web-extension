@@ -119,11 +119,14 @@ function reloadPopup(tabID) {
     windowId: browser.windows.WINDOW_ID_CURRENT,
   };
 
-  browser.tabs.query(queryInfo).then(tabs => {
+  browser.tabs.query(queryInfo).then(async tabs => {
     const tabID = tabs[0].id;
     // get the extension's window object
-    const extensionWindow = browser.extension.getBackgroundPage();
-    const request = extensionWindow.requests[tabID];
+    const storage = (typeof browser === "undefined") ? chrome.storage.local : browser.storage.local;
+    const details = (await storage.get([tabID.toString()]))[tabID];
+    const request = new FRZRequest(details);
+    // throw new Error(`Not implemented ${tabID.toString()} + ${JSON.stringify(request.headers)}`);
+
 
     $('#smartcache-toggle').hide();
 
@@ -131,9 +134,9 @@ function reloadPopup(tabID) {
       const explanation = [];
       for (const flag in request.status) {
         explanation.push(
-          `<a class="btn btn-default" data-toggle="tooltip" data-placement="top" title="${
-            request.status[flag]
-          }">${flag}</a>`
+            `<a class="btn btn-default" data-toggle="tooltip" data-placement="top" title="${
+                request.status[flag]
+            }">${flag}</a>`
         );
         if (flag === 'sc') {
           $('#smartcache-toggle').show();
@@ -142,17 +145,17 @@ function reloadPopup(tabID) {
       $('#x-fstrz-explanation').html(explanation.join(' '));
 
       getFstrzCookie(request.details.url)
-        .then(fstrzCookie => {
-          if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
-            $('#fstrz-false').hide();
-            $('#optimized_options').hide();
-          } else {
-            $('#fstrz-true').hide();
-          }
+          .then(fstrzCookie => {
+            if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
+              $('#fstrz-false').hide();
+              $('#optimized_options').hide();
+            } else {
+              $('#fstrz-true').hide();
+            }
 
-          $('#cookie-fstrz').val(fstrzCookie && fstrzCookie.value);
-        })
-        .catch(logError);
+            $('#cookie-fstrz').val(fstrzCookie && fstrzCookie.value);
+          })
+          .catch(logError);
 
       getOptimizationCookie('frz-optimize-edge-speed', request.details.url)
           .then(optimizationCookie => {
@@ -175,30 +178,30 @@ function reloadPopup(tabID) {
           .catch(logError);
 
       getFstrzVaryCookie(request.details.url)
-        .then(fstrzVaryCookie => {
-          $('#cookie-fstrz-vary').val(fstrzVaryCookie && fstrzVaryCookie.value);
-        })
-        .catch(logError);
+          .then(fstrzVaryCookie => {
+            $('#cookie-fstrz-vary').val(fstrzVaryCookie && fstrzVaryCookie.value);
+          })
+          .catch(logError);
 
       getDebugCookie(request.details.url)
-        .then(debugCookie => {
-          if (debugCookie && debugCookie.value === 'true') {
-            $('#enable-trace').hide();
-          } else {
-            $('#disable-trace').hide();
-          }
-        })
-        .catch(logError);
+          .then(debugCookie => {
+            if (debugCookie && debugCookie.value === 'true') {
+              $('#enable-trace').hide();
+            } else {
+              $('#disable-trace').hide();
+            }
+          })
+          .catch(logError);
 
       request
-        .getFrzFlags()
-        .then(flags => {
-          for (flag in flags) {
-            document.getElementById(flag).checked = flags[flag];
-          }
-          $('#testflags table').show();
-        })
-        .catch(logError);
+          .getFrzFlags()
+          .then(flags => {
+            for (flag in flags) {
+              document.getElementById(flag).checked = flags[flag];
+            }
+            $('#testflags table').show();
+          })
+          .catch(logError);
     } else {
       $('#section-middle').hide();
       $('#section-bottom').hide();
@@ -206,7 +209,7 @@ function reloadPopup(tabID) {
 
     if (request.pluggedToCDN()) {
       $('#cdn_status').html(
-        request.servedByCDN() ? '<a class="btn btn-default">HIT</a>' : '<a class="btn btn-default">MISS</a>'
+          request.servedByCDN() ? '<a class="btn btn-default">HIT</a>' : '<a class="btn btn-default">MISS</a>'
       );
     } else {
       $('#cdn_div').hide();
@@ -221,21 +224,21 @@ function reloadPopup(tabID) {
 
     $('#fstrz-true').on('click', () => {
       setFstrzCookie(request.details.url, 'true')
-        .then(() => {
-          return reloadPopup(tabID);
-        })
-        .catch(logError);
+          .then(() => {
+            return reloadPopup(tabID);
+          })
+          .catch(logError);
     });
 
     $('#fstrz-false').on('click', () => {
       setFstrzCookie(request.details.url, 'false')
-        .then(() => {
-          return removeFrzVaryCookie(request.details.url);
-        })
-        .then(() => {
-          return reloadPopup(tabID);
-        })
-        .catch(logError);
+          .then(() => {
+            return removeFrzVaryCookie(request.details.url);
+          })
+          .then(() => {
+            return reloadPopup(tabID);
+          })
+          .catch(logError);
     });
 
     $('#fstrz-edge-speed').on('click', () => {
@@ -268,7 +271,7 @@ function reloadPopup(tabID) {
       });
     });
 
-    $('.copy-button').on('click', function(evt) {
+    $('.copy-button').on('click', function (evt) {
       const $el = $(this);
       const copyId = $el.data('copyId');
       const $copyEl = $(`#${copyId}`);
@@ -289,7 +292,7 @@ function reloadPopup(tabID) {
       request.showLazyloadedImages();
     });
 
-    document.getElementById('feature-flag-table').addEventListener('click', function(e) {
+    document.getElementById('feature-flag-table').addEventListener('click', function (e) {
       if (e.target && e.target.nodeName == 'INPUT') {
         toggleFlag(e.target.id);
       }
@@ -297,7 +300,7 @@ function reloadPopup(tabID) {
 
     function toggleFlag(featureFlagName) {
       const toggle = document.getElementById(featureFlagName).checked,
-        flagName = document.getElementById(featureFlagName).dataset.flag;
+          flagName = document.getElementById(featureFlagName).dataset.flag;
 
       const url = new URL(tabs[0].url);
       const params = url.searchParams;
@@ -306,48 +309,48 @@ function reloadPopup(tabID) {
 
       // chrome doesn't reload the popup by itself, firefox reload the popup
       if (navigator.userAgent.includes('Chrome')) {
-        browser.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
+        browser.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
           return reloadPopup(tabID);
         });
       }
 
-      browser.tabs.update(tabID, { url: newUrl }).catch(logError);
+      browser.tabs.update(tabID, {url: newUrl}).catch(logError);
     }
 
     $('#getFragments').on('click', () => {
       request.getFragments().then(fragments => {
         fragments &&
-          fragments.forEach((fragment, index) => {
-            const code = document.createElement('code');
-            code.classList.add('html');
-            const h3 = document.createElement('h3');
-            const pre = document.createElement('pre');
-            code.innerText = fragment;
-            pre.appendChild(code);
+        fragments.forEach((fragment, index) => {
+          const code = document.createElement('code');
+          code.classList.add('html');
+          const h3 = document.createElement('h3');
+          const pre = document.createElement('pre');
+          code.innerText = fragment;
+          pre.appendChild(code);
 
-            const re = /data-fstrz-fragment-selector="([^"]*)"/;
-            h3.innerText = `${index + 1} - ${re.exec(fragment)[1]}`;
-            document.getElementById('fragments_div').appendChild(h3);
-            document.getElementById('fragments_div').appendChild(pre);
-          });
+          const re = /data-fstrz-fragment-selector="([^"]*)"/;
+          h3.innerText = `${index + 1} - ${re.exec(fragment)[1]}`;
+          document.getElementById('fragments_div').appendChild(h3);
+          document.getElementById('fragments_div').appendChild(pre);
+        });
       });
     });
 
-    browser.storage.local
-      .get('disable-fasterize-cache')
-      .then(res => {
-        $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
-      })
-      .catch(logError);
-
-    $('#disable-fasterize-cache').change(function() {
-      browser.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
-      browser.runtime
-        .sendMessage({
-          action: 'update-settings',
-          'disable-fasterize-cache': this.checked,
+    storage
+        .get('disable-fasterize-cache')
+        .then(res => {
+          $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
         })
         .catch(logError);
+
+    $('#disable-fasterize-cache').change(function () {
+      storage.set({'disable-fasterize-cache': this.checked}).catch(logError);
+      browser.runtime
+          .sendMessage({
+            action: 'update-settings',
+            'disable-fasterize-cache': this.checked,
+          })
+          .catch(logError);
     });
 
     $('#show-deferjs-debug').on('click', () => {

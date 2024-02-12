@@ -51,6 +51,34 @@ sudo apt-get install hub
 
 The command `npm run release` publish on Chrome Web Store and sign the extension on Mozilla Addon Store. The firefox extension is released on github.    
 
+We need to change manisfest.json if we want to release a version on firefox or chrome. Because Firefox doesn't support "service_worker" but chrome needs it for Manifest V3.
+
+Manifest for firefox : 
+``
+"action": {
+"default_title": "Fasterize",
+"default_icon": "icons/store/icon.png"
+},
+"background": {
+"scripts": [
+"mapping.js",
+"frz-request.js",
+"main.js"
+]
+}``
+
+
+Manifest for chrome :
+``
+"action": {
+"default_popup": "popup/popup.html",
+"default_title": "Fasterize",
+"default_icon": "icons/store/icon.png"
+},
+"background": {
+"service_worker": "main.js"
+}``
+
 Note : A note on lastpass contains the credentials
 
 First, get a new **code** by https://developer.chrome.com/docs/webstore/using_webstore_api/#test-oauth :

@@ -1,65 +1,90 @@
-// a mapping of tab IDs to window.requests
-window.requests = {};
+// Check chrome
+if (typeof browser === "undefined") {
+    try {
+        importScripts( "mapping.js", "frz-request.js");
+    } catch (e) {
+        console.log(e);
+    }
+} else {
+    // To ask " Access your data for all websites " permission on Firefox
+    browser.permissions.getAll().then((permissions) => {
+        if(permissions.origins.indexOf("<all_urls>") === -1){
+            browser.action.onClicked.addListener(async (tab) => {
+                console.log('Fasterize extension : request permission');
+                browser.permissions.request({origins: ['<all_urls>']})
+            });
+        }
+    });
+}
 
-// listen to all web requests and when request is completed, create a new
-// Request object that contains a bunch of information about the request
-const processCompletedRequest = details => {
-  const request = new FRZRequest(details);
-  window.requests[details.tabId] = request;
-  setTimeout(() => {
-    request.setPageActionIconAndPopup();
-  }, 300);
+
+const processCompletedRequest = (details) => {
+    console.log('Fasterize extension : processCompletedRequest');
+    // Utilisez chrome.storage.local dans Chrome et browser.storage.local dans Firefox
+    const storage = (typeof browser === "undefined") ? chrome.storage.local : browser.storage.local;
+
+    const request = new FRZRequest(details);
+    storage.set({[details.tabId]: details}, () => {
+        request.setPageActionIconAndPopup();
+    });
 };
-
 const filter = {
-  urls: ['http://*/*', 'https://*/*'],
-  types: ['main_frame'],
+    urls: ['http://*/*', 'https://*/*'],
+    types: ['main_frame'],
 };
 
 const extraInfoSpec = ['responseHeaders'];
 
-// start listening to all web window.requests
-browser.webRequest.onCompleted.addListener(processCompletedRequest, filter, extraInfoSpec);
+// Utilisez `chrome` pour Chrome et `browser` pour Firefox
+const webRequest = typeof chrome !== 'undefined' ? chrome.webRequest : browser.webRequest;
+const tabs = typeof chrome !== 'undefined' ? chrome.tabs : browser.tabs;
+const runtime = typeof chrome !== 'undefined' ? chrome.runtime : browser.runtime;
+
+webRequest.onCompleted.addListener(processCompletedRequest, filter, extraInfoSpec);
 
 let shouldDisableFasterizeCache = false;
 
-browser.storage.local.get('disable-fasterize-cache').then(res => {
-  shouldDisableFasterizeCache = res['disable-fasterize-cache'];
+// Utilisez le bon objet pour accéder au stockage
+const storage = typeof chrome !== 'undefined' ? chrome.storage.local : browser.storage.local;
+
+storage.get('disable-fasterize-cache', (res) => {
+    shouldDisableFasterizeCache = res['disable-fasterize-cache'] || false;
 });
 
-browser.webRequest.onBeforeSendHeaders.addListener(
-  details => {
-    if (shouldDisableFasterizeCache) {
-      details.requestHeaders.push({
-        name: 'Cache-Control',
-        value: 'no-fstrz-cache',
-      });
-      details.requestHeaders.push({ name: 'X-Frz-Nocache', value: Date.now().toString() });
-    }
-    return { requestHeaders: details.requestHeaders };
-  },
-  filter,
-  ['blocking', 'requestHeaders']
+webRequest.onBeforeSendHeaders.addListener(
+    (details) => {
+        if (shouldDisableFasterizeCache) {
+            details.requestHeaders.push({
+                name: 'Cache-Control',
+                value: 'no-fstrz-cache',
+            });
+            details.requestHeaders.push({name: 'X-Frz-Nocache', value: Date.now().toString()});
+        }
+        return {requestHeaders: details.requestHeaders};
+    },
+    filter,
+    ['requestHeaders']
 );
 
-// when a tab is replaced, usually when a request started in a background tab
-// and then the tab is upgraded to a regular tab (becomes visible)
-browser.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
-  if (removedTabId in window.requests) {
-    window.requests[addedTabId] = window.requests[removedTabId];
-    delete window.requests[removedTabId];
-  } else {
-    console.log('Could not find an entry in window.requests when replacing ', removedTabId);
-  }
+tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+    storage.get(removedTabId.toString(), (result) => {
+        if (result[removedTabId]) {
+            const request = result[removedTabId];
+            storage.set({[addedTabId]: request});
+            storage.remove([removedTabId.toString()]);
+        } else {
+            console.log('Could not find an entry in storage when replacing ', removedTabId);
+        }
+    });
 });
 
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'update-settings') {
-    shouldDisableFasterizeCache = request['disable-fasterize-cache'];
-  }
+runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'update-settings') {
+        shouldDisableFasterizeCache = request['disable-fasterize-cache'];
+        storage.set({'disable-fasterize-cache': shouldDisableFasterizeCache});
+    }
 });
 
-// clear request data when tabs are destroyed
-browser.tabs.onRemoved.addListener(tabId => {
-  delete window.requests[tabId];
+tabs.onRemoved.addListener((tabId) => {
+    storage.remove([tabId.toString()]);
 });
