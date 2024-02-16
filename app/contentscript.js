@@ -15,8 +15,9 @@ function getFragments() {
 
 function getDeferjsDebug() {
   var s = document.createElement('script');
+  var runtimeApi = (typeof browser === "undefined") ? chrome.runtime : browser.runtime;
   s.setAttribute('type', 'text/javascript');
-  s.setAttribute('src', chrome.extension.getURL('show_deferjs_trace.js'));
+  s.setAttribute('src', runtimeApi.getURL('show_deferjs_trace.js'));
   document.body.appendChild(s);
 }
 

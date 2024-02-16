@@ -1,14 +1,14 @@
 // Check chrome
 if (typeof browser === "undefined") {
     try {
-        importScripts( "mapping.js", "frz-request.js");
+        importScripts("mapping.js", "frz-request.js");
     } catch (e) {
         console.log(e);
     }
 } else {
     // To ask " Access your data for all websites " permission on Firefox
     browser.permissions.getAll().then((permissions) => {
-        if(permissions.origins.indexOf("<all_urls>") === -1){
+        if (permissions.origins.indexOf("<all_urls>") === -1) {
             browser.action.onClicked.addListener(async (tab) => {
                 console.log('Fasterize extension : request permission');
                 browser.permissions.request({origins: ['<all_urls>']})
@@ -51,21 +51,6 @@ storage.get('disable-fasterize-cache', (res) => {
     shouldDisableFasterizeCache = res['disable-fasterize-cache'] || false;
 });
 
-webRequest.onBeforeSendHeaders.addListener(
-    (details) => {
-        if (shouldDisableFasterizeCache) {
-            details.requestHeaders.push({
-                name: 'Cache-Control',
-                value: 'no-fstrz-cache',
-            });
-            details.requestHeaders.push({name: 'X-Frz-Nocache', value: Date.now().toString()});
-        }
-        return {requestHeaders: details.requestHeaders};
-    },
-    filter,
-    ['requestHeaders']
-);
-
 tabs.onReplaced.addListener((addedTabId, removedTabId) => {
     storage.get(removedTabId.toString(), (result) => {
         if (result[removedTabId]) {
@@ -73,14 +58,44 @@ tabs.onReplaced.addListener((addedTabId, removedTabId) => {
             storage.set({[addedTabId]: request});
             storage.remove([removedTabId.toString()]);
         } else {
-            console.log('Could not find an entry in storage when replacing ', removedTabId);
+            console.log('Fasterize extension : Could not find an entry in storage when replacing ', removedTabId);
         }
     });
 });
 
 runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'update-settings') {
+        const declarativeNetRequest = typeof chrome !== 'undefined' ? chrome.declarativeNetRequest : browser.declarativeNetRequest;
         shouldDisableFasterizeCache = request['disable-fasterize-cache'];
+        if(shouldDisableFasterizeCache){
+            declarativeNetRequest.updateDynamicRules({
+                addRules: [{
+                    "id": 1,
+                    "priority": 1,
+                    "action": {
+                        "type": "modifyHeaders",
+                        "requestHeaders": [
+                            {"header": "Cache-Control", "operation": "set", "value": "no-fstrz-cache"},
+                            {"header": "X-Frz-Nocache", "operation": "set", "value": Date.now().toString()}
+                        ]
+                    },
+                    "condition": {
+                        "urlFilter": "|http*",
+                        "resourceTypes": ["main_frame"]
+                    }
+                }],
+                removeRuleIds: [1],
+            },(result) => {
+                console.log('Fasterize extension : rule requestHeaders added', result);
+            });
+        }else{
+            declarativeNetRequest.updateDynamicRules({
+                addRules: [],
+                removeRuleIds: [1]
+            },(result) => {
+                console.log('Fasterize extension : rule requestHeaders deleted', result);
+            })
+        }
         storage.set({'disable-fasterize-cache': shouldDisableFasterizeCache});
     }
 });

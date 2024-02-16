@@ -21,8 +21,7 @@
     "tabs",
     "cookies",
     "storage",
-    "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess"
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "http://*/*",
