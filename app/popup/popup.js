@@ -209,6 +209,7 @@ function reloadPopup(tabID) {
         })
         .catch(logError);
     } else {
+      $('#section-top').text('This website is not served by Fasterize');
       $('#section-middle').hide();
       $('#section-bottom').hide();
     }

@@ -214,22 +214,17 @@ class FRZRequest {
 
     if (this.servedByFasterize()) {
       console.log('Fasterize extension : set icon ' + JSON.stringify(this.status));
-      actionApi.setIcon({
-        tabId: this.details.tabId,
-        path: iconPath,
-      });
+      actionApi.setIcon({ tabId: this.details.tabId, path: iconPath });
+      if (self.headers['x-fstrz']) {
+        actionApi.setTitle({ title: `Fasterize Status : ${self.headers['x-fstrz']}`, tabId: tabID });
+      }
+      // warning : this part is not called in Chrome
+      //  The action.onClicked event won't be sent if the extension action has specified a popup to show on click of the current tab.
+      // https://developer.chrome.com/docs/extensions/reference/api/action#popup
       actionApi.onClicked.addListener(tab => {
         console.log('Fasterize extension : open popup');
-        actionApi.setPopup({
-          tabId: tabID,
-          popup: 'popup/popup.html',
-        });
-        if (self.headers['x-fstrz']) {
-          actionApi.setTitle({
-            title: `Fasterize Status : ${self.headers['x-fstrz']}`,
-            tabId: tabID,
-          });
-        }
+        actionApi.setPopup({ tabId: tabID, popup: 'popup/popup.html' });
+
         // OpenPopup is not supported by Chrome
         if (typeof actionApi.openPopup === 'function') {
           actionApi.openPopup();
@@ -238,17 +233,7 @@ class FRZRequest {
         }
       });
     } else {
-      actionApi
-        .setIcon({
-          tabId: this.details.tabId,
-          path: iconPath,
-        })
-        .catch(logError);
-      if (typeof actionApi.openPopup === 'function') {
-        actionApi.openPopup();
-      } else {
-        console.log('openPopup() not supported');
-      }
+      actionApi.setIcon({ tabId: this.details.tabId, path: iconPath }).catch(logError);
     }
   }
 
