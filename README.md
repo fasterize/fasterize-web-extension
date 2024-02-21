@@ -39,6 +39,7 @@ Reference is https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Debugging
 
 # Release
 
+### 1. Prerequisite
 You need to have `hub` installed to do the release and grunt `npm install -g grunt`
 
 On OSX, just run `brew install hub`. On Ubuntu :
@@ -51,7 +52,45 @@ sudo apt-get install hub
 
 The command `npm run release` publish on Chrome Web Store and sign the extension on Mozilla Addon Store. The firefox extension is released on github.    
 
-Note : A note on lastpass contains the credentials
+### 2. Manifest
+The release script will <b>automatically</b> change manisfest.json. Because Firefox doesn't support "service_worker" but chrome needs it for Manifest V3.
+
+Manifest for firefox : 
+``
+"action": {
+"default_title": "Fasterize",
+"default_icon": "icons/store/icon.png"
+},
+"background": {
+"scripts": [
+"mapping.js",
+"frz-request.js",
+"main.js"
+]
+},
+"browser_specific_settings": {
+"gecko": {
+"id": "{c1687a9a-9054-430e-94cf-2ef9b3caeb7b}",
+"update_url": "https://raw.githubusercontent.com/fasterize/fasterize-web-extension/master/app/update-manifest.json",
+"strict_min_version": "48.0"
+}
+}``
+
+
+Manifest for chrome :
+``
+"action": {
+"default_popup": "popup/popup.html",
+"default_title": "Fasterize",
+"default_icon": "icons/store/icon.png"
+},
+"background": {
+"service_worker": "main.js"
+}``
+
+### 3. Release
+
+#### 3.1 Get credentials (A note on lastpass contains the credentials, skip this step if you already have the credentials)
 
 First, get a new **code** by https://developer.chrome.com/docs/webstore/using_webstore_api/#test-oauth :
 ```
@@ -64,7 +103,8 @@ curl "https://accounts.google.com/o/oauth2/token" -d \
 "client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$CODE&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
 ```
 
-Then 
+#### 3.2 Start release with script 
+ 
 ```
 MOZILLA_API_KEY=X MOZILLA_API_SECRET=X CHROME_WEBSTORE_ID=X CHROME_WEBSTORE_SECRET=X CHROME_WEBSTORE_REFRESH=X node release.js {version}
 ```

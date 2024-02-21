@@ -1,5 +1,5 @@
 function logError(e) {
-  console.log(browser.runtime.lastError, e);
+  console.log((typeof browser === 'undefined' ? chrome : browser).runtime.lastError, e);
 }
 
 // the FRZRequest object, contains information about a request
@@ -18,6 +18,9 @@ class FRZRequest {
     this.headersHints = false;
     this.status = {};
     this.ip = details.ip;
+
+    //define browser api to use
+    this.browserApi = typeof browser === 'undefined' ? chrome : browser;
 
     this.preProcessHeaders();
   }
@@ -203,58 +206,58 @@ class FRZRequest {
     const self = this;
     const iconPath = this.getPageActionPath();
     const tabID = this.details.tabId;
+    // To handle Chrome and firefox
+    console.log('Fasterize active popup');
+
+    if (!this.browserApi.action) {
+      console.error('Action API is not available.');
+      return;
+    }
 
     if (this.servedByFasterize()) {
-      browser.pageAction
-        .setIcon({
-          tabId: this.details.tabId,
-          path: iconPath,
-        })
-        .then(() => {
-          browser.pageAction.setPopup({
-            tabId: tabID,
-            popup: 'popup/popup.html',
-          });
+      console.log('Fasterize extension : set icon ' + JSON.stringify(this.status));
+      this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath }).catch(logError);
+      if (self.headers['x-fstrz']) {
+        this.browserApi.action.setTitle({ title: `Fasterize Status : ${self.headers['x-fstrz']}`, tabId: tabID }).catch(logError);
+      }
+      // warning : this part is not called in Chrome
+      //  The action.onClicked event won't be sent if the extension action has specified a popup to show on click of the current tab.
+      // https://developer.chrome.com/docs/extensions/reference/api/action#popup
+      this.browserApi.action.onClicked.addListener(tab => {
+        console.log('Fasterize extension : open popup');
+        this.browserApi.action.setPopup({ tabId: tabID, popup: 'popup/popup.html' }).catch(logError);
 
-          if (self.headers['x-fstrz']) {
-            browser.pageAction.setTitle({
-              title: `Fasterize Status : ${self.headers['x-fstrz']}`,
-              tabId: tabID,
-            });
-          }
-          browser.pageAction.show(tabID);
-        });
+        // OpenPopup is not supported by Chrome
+        if (typeof this.browserApi.action.openPopup === 'function') {
+          this.browserApi.action.openPopup();
+        } else {
+          console.log('openPopup() not supported');
+        }
+      });
     } else {
-      browser.pageAction
-        .setIcon({
-          tabId: tabID,
-          path: iconPath,
-        })
-        .catch(logError);
-
-      browser.pageAction.show(this.details.tabId);
+      this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath }).catch(logError);
     }
   }
 
   highlightFragments() {
-    browser.tabs.sendMessage(this.details.tabId, { action: 'highlight_fragments' }).catch(logError);
+    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'highlight_fragments' }).catch(logError);
   }
 
   getFragments() {
-    return browser.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch(logError);
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch(logError);
   }
 
   getDeferjsDebug() {
-    return browser.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch(logError);
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch(logError);
   }
 
   getFrzFlags() {
-    return browser.tabs.sendMessage(this.details.tabId, { action: 'get_frz_flags' }).catch(logError);
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_frz_flags' }).catch(logError);
   }
 
   showLazyloadedImages() {
-    browser.tabs.sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' }).catch(logError);
+    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' }).catch(logError);
   }
 }
 
-window.FRZRequest = FRZRequest;
+// window.FRZRequest = FRZRequest;
