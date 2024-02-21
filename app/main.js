@@ -1,5 +1,7 @@
 // Check chrome
-if (typeof browser === 'undefined') {
+const isChrome = typeof browser === 'undefined';
+const browserApi = isChrome ? chrome : browser;
+if (isChrome) {
   try {
     importScripts('mapping.js', 'frz-request.js');
   } catch (e) {
@@ -19,11 +21,8 @@ if (typeof browser === 'undefined') {
 
 const processCompletedRequest = details => {
   console.log('Fasterize extension : processCompletedRequest');
-  // Utilisez chrome.storage.local dans Chrome et browser.storage.local dans Firefox
-  const storage = typeof browser === 'undefined' ? chrome.storage.local : browser.storage.local;
-
   const request = new FRZRequest(details);
-  storage.set({ [details.tabId]: details }, () => {
+  browserApi.storage.local.set({ [details.tabId]: details }, () => {
     request.setPageActionIconAndPopup();
   });
 };
@@ -34,41 +33,31 @@ const filter = {
 
 const extraInfoSpec = ['responseHeaders'];
 
-// Utilisez `chrome` pour Chrome et `browser` pour Firefox
-const webRequest = typeof chrome !== 'undefined' ? chrome.webRequest : browser.webRequest;
-const tabs = typeof chrome !== 'undefined' ? chrome.tabs : browser.tabs;
-const runtime = typeof chrome !== 'undefined' ? chrome.runtime : browser.runtime;
-
-webRequest.onCompleted.addListener(processCompletedRequest, filter, extraInfoSpec);
+browserApi.webRequest.onCompleted.addListener(processCompletedRequest, filter, extraInfoSpec);
 
 let shouldDisableFasterizeCache = false;
 
-// Utilisez le bon objet pour accéder au stockage
-const storage = typeof chrome !== 'undefined' ? chrome.storage.local : browser.storage.local;
-
-storage.get('disable-fasterize-cache', res => {
+browserApi.storage.local.get('disable-fasterize-cache', res => {
   shouldDisableFasterizeCache = res['disable-fasterize-cache'] || false;
 });
 
-tabs.onReplaced.addListener((addedTabId, removedTabId) => {
-  storage.get(removedTabId.toString(), result => {
+browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+  browserApi.storage.local.get(removedTabId.toString(), result => {
     if (result[removedTabId]) {
       const request = result[removedTabId];
-      storage.set({ [addedTabId]: request });
-      storage.remove([removedTabId.toString()]);
+      browserApi.storage.local.set({ [addedTabId]: request });
+      browserApi.storage.local.remove([removedTabId.toString()]);
     } else {
       console.log('Fasterize extension : Could not find an entry in storage when replacing ', removedTabId);
     }
   });
 });
 
-runtime.onMessage.addListener((request, sender, sendResponse) => {
+browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'update-settings') {
-    const declarativeNetRequest =
-      typeof chrome !== 'undefined' ? chrome.declarativeNetRequest : browser.declarativeNetRequest;
     shouldDisableFasterizeCache = request['disable-fasterize-cache'];
     if (shouldDisableFasterizeCache) {
-      declarativeNetRequest.updateDynamicRules(
+      browserApi.declarativeNetRequest.updateDynamicRules(
         {
           addRules: [
             {
@@ -104,10 +93,10 @@ runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       );
     }
-    storage.set({ 'disable-fasterize-cache': shouldDisableFasterizeCache });
+    browserApi.storage.local.set({ 'disable-fasterize-cache': shouldDisableFasterizeCache });
   }
 });
 
-tabs.onRemoved.addListener(tabId => {
-  storage.remove([tabId.toString()]);
+browserApi.tabs.onRemoved.addListener(tabId => {
+  browserApi.storage.local.remove([tabId.toString()]);
 });
