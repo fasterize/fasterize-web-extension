@@ -125,8 +125,8 @@ function reloadPopup(tabID) {
     // throw new Error(`Not implemented ${tabID.toString()} + ${JSON.stringify(request.headers)}`);
 
     $('#smartcache-toggle').hide();
-
     if (request.headers['x-fstrz']) {
+
       const explanation = [];
       for (const flag in request.status) {
         explanation.push(
@@ -153,32 +153,6 @@ function reloadPopup(tabID) {
         })
         .catch(logError);
 
-      getOptimizationCookie('frz_espeed', request.details.url)
-        .then(optimizationCookie => {
-          if (
-            (optimizationCookie && optimizationCookie.value === 'false') ||
-            request.headers['x-frz-espeed']
-          ) {
-            $('#fstrz-espeed').prop('checked', false);
-          } else {
-            $('#fstrz-espeed').prop('checked', true);
-          }
-        })
-        .catch(logError);
-
-      getOptimizationCookie('frz_eseo', request.details.url)
-        .then(optimizationCookie => {
-          if (
-            (optimizationCookie && optimizationCookie.value === 'false') ||
-            request.headers['x-frz-eseo']
-          ) {
-            $('#fstrz-eseo').prop('checked', false);
-          } else {
-            $('#fstrz-eseo').prop('checked', true);
-          }
-        })
-        .catch(logError);
-
       getFstrzVaryCookie(request.details.url)
         .then(fstrzVaryCookie => {
           $('#cookie-fstrz-vary').val(fstrzVaryCookie && fstrzVaryCookie.value);
@@ -199,11 +173,39 @@ function reloadPopup(tabID) {
         .getFrzFlags()
         .then(flags => {
           for (flag in flags) {
-            document.getElementById(flag).checked = flags[flag];
+              if(flag === 'edge_speed' || flag === 'edge_seo') {
+                  $(`#fstrz-e${flag.split('_')[1]}`).prop('checked', flags[flag]);
+              }else{
+                document.getElementById(flag).checked = flags[flag];
+              }
           }
           $('#testflags table').show();
-        })
-        .catch(logError);
+        }).then(() => {
+          getOptimizationCookie('frz_espeed', request.details.url)
+              .then(optimizationCookie => {
+                if (
+                    (optimizationCookie && optimizationCookie.value === 'false') ||
+                    request.headers['x-frz-espeed']
+                ) {
+                  $('#fstrz-espeed').prop('checked', false);
+                } else {
+                  $('#fstrz-espeed').prop('checked', true);
+                }
+              })
+              .catch(logError);
+          getOptimizationCookie('frz_eseo', request.details.url)
+              .then(optimizationCookie => {
+                if (
+                    (optimizationCookie && optimizationCookie.value === 'false') ||
+                    request.headers['x-frz-eseo']
+                ) {
+                  $('#fstrz-eseo').prop('checked', false);
+                } else {
+                  $('#fstrz-eseo').prop('checked', true);
+                }
+              })
+          .catch(logError);
+      }).catch(logError);
     } else {
       $('#section-top').text('This website is not served by Fasterize');
       $('#section-middle').hide();
