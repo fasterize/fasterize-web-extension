@@ -10,7 +10,8 @@ if (
     !process.env['MOZILLA_API_SECRET'] ||
     !process.env['CHROME_WEBSTORE_ID'] ||
     !process.env['CHROME_WEBSTORE_SECRET'] ||
-    !process.env['CHROME_WEBSTORE_REFRESH']
+    !process.env['CHROME_WEBSTORE_REFRESH'] ||
+    !process.env['GITHUB_TOKEN']
 ) {
     console.log(`
 Usage: MOZILLA_API_KEY=X \
@@ -18,6 +19,7 @@ MOZILLA_API_SECRET=X \
 CHROME_WEBSTORE_ID=X \
 CHROME_WEBSTORE_SECRET=X \
 CHROME_WEBSTORE_REFRESH=X \
+GITHUB_TOKEN=X \
 node release.js {version}`);
     process.exit(1);
 }
@@ -65,7 +67,7 @@ fs.writeFileSync(readmeLocation, readme);
 console.log(`-> commit changes, tag with the version ${version}`);
 childProcess.execSync(`git commit -a -m "Bump to ${version}"`);
 childProcess.execSync(`git tag ${version}`);
-childProcess.execSync(`git push origin --tags && git push`);
+childProcess.execSync(`GITHUB_TOKEN=${process.env['GITHUB_TOKEN']} git push origin --tags && git push`);
 
 console.log('-> publish on Chrome Web Store');
 childProcess.execSync('grunt', {stdio: 'inherit'});
@@ -107,6 +109,6 @@ childProcess.execSync(
 
 console.log('-> publish mozilla addon on Github releases');
 childProcess.execSync(
-    `hub release create -a dist/firefox/fasterize_status-${version}.xpi -m "Release ${version}" ${version}`,
+    `GITHUB_TOKEN=${process.env['GITHUB_TOKEN']} hub release create -a dist/firefox/fasterize_status-${version}.xpi -m "Release ${version}" ${version}`,
     {stdio: 'inherit'}
 );
