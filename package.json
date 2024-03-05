@@ -1,6 +1,6 @@
 {
   "name": "Fasterize-Status",
-  "version": "3.5.2",
+  "version": "4.0.0",
   "description": "See the status of the request.",
   "main": "main.js",
   "scripts": {
