@@ -8,17 +8,11 @@ if (
     !version ||
     !process.env['MOZILLA_API_KEY'] ||
     !process.env['MOZILLA_API_SECRET'] ||
-    !process.env['CHROME_WEBSTORE_ID'] ||
-    !process.env['CHROME_WEBSTORE_SECRET'] ||
-    !process.env['CHROME_WEBSTORE_REFRESH'] ||
     !process.env['GITHUB_TOKEN']
 ) {
     console.log(`
 Usage: MOZILLA_API_KEY=X \
 MOZILLA_API_SECRET=X \
-CHROME_WEBSTORE_ID=X \
-CHROME_WEBSTORE_SECRET=X \
-CHROME_WEBSTORE_REFRESH=X \
 GITHUB_TOKEN=X \
 node release.js {version}`);
     process.exit(1);

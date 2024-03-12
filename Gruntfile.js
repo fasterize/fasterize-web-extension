@@ -16,27 +16,9 @@ module.exports = function(grunt) {
         src: ['**/*'],
         dest: 'dist/chrome/'
       }
-    },
-    webstore_upload: {
-      "accounts": {
-        "default": { //account under this section will be used by default
-          publish: true, //publish item right after uploading. default false
-          client_id: process.env.CHROME_WEBSTORE_ID,
-          client_secret: process.env.CHROME_WEBSTORE_SECRET,
-          refresh_token: process.env.CHROME_WEBSTORE_REFRESH,
-        }
-      },
-      "extensions": {
-        "extension1": {
-          //required
-          appID: "pophpmnchlcddhhilmnopbahlaohdfig",
-          //required, we can use dir name and upload most recent zip file
-          zip: archive
-        }
-      }
     }
   });
 
-  grunt.registerTask('publish_chrome', ['compress', 'webstore_upload']);
+  grunt.registerTask('publish_chrome', ['compress']);
   grunt.registerTask('default', ['publish_chrome']);
 };

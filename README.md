@@ -89,22 +89,10 @@ Manifest for chrome :
 }``
 
 ### 3. Release
-
-#### 3.1 Get credentials (A note on lastpass contains the credentials, skip this step if you already have the credentials)
-
-First, get a new **code** by https://developer.chrome.com/docs/webstore/using_webstore_api/#test-oauth :
-```
-https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&client_id=$CLIENT_ID&redirect_uri=urn:ietf:wg:oauth:2.0:oob
-```
-
-Then 
-```
-curl "https://accounts.google.com/o/oauth2/token" -d \
-"client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&code=$CODE&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
-```
-
-#### 3.2 Start release with script 
+This command will sign the extension on Mozilla Addon Store. The firefox extension is released on github. The chrome extension is not directly published on Chrome Web Store.
+It will create a build and a zip file in the `dist/chrome` directory. You have to publish the zip file on the Chrome Web Store manually at https://chrome.google.com/webstore/devconsole/d47c0dfe-54f9-41c3-a785-e868a9854aa6
  
 ```
-MOZILLA_API_KEY=X MOZILLA_API_SECRET=X CHROME_WEBSTORE_ID=X CHROME_WEBSTORE_SECRET=X CHROME_WEBSTORE_REFRESH=X node release.js {version}
+MOZILLA_API_KEY=X MOZILLA_API_SECRET=X GITHUB_TOKEN=X node release.js {version}
 ```
+
