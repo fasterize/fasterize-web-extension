@@ -83,14 +83,14 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       );
     } else {
-      declarativeNetRequest.updateDynamicRules(
+      browserApi.declarativeNetRequest.updateDynamicRules(
         {
           addRules: [],
           removeRuleIds: [1],
         },
         result => {
           console.log('Fasterize extension : rule requestHeaders deleted', result);
-        }
+        },
       );
     }
     browserApi.storage.local.set({ 'disable-fasterize-cache': shouldDisableFasterizeCache });
