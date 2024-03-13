@@ -1,7 +1,3 @@
-function logError(e) {
-  console.log((typeof browser === 'undefined' ? chrome : browser).runtime.lastError, e);
-}
-
 // the FRZRequest object, contains information about a request
 class FRZRequest {
   constructor(details) {
@@ -23,6 +19,10 @@ class FRZRequest {
     this.browserApi = typeof browser === 'undefined' ? chrome : browser;
 
     this.preProcessHeaders();
+  }
+
+  logError(fctName, e) {
+    console.error(fctName, browserApi.lastError, e);
   }
 
   // convert the headers array into an object and lowercase all names
@@ -215,17 +215,16 @@ class FRZRequest {
     }
 
     if (this.servedByFasterize()) {
-      console.log('Fasterize extension : set icon ' + JSON.stringify(this.status));
-      this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath }).catch(logError);
+      this.setIcon(iconPath);
       if (self.headers['x-fstrz']) {
-        this.browserApi.action.setTitle({ title: `Fasterize Status : ${self.headers['x-fstrz']}`, tabId: tabID }).catch(logError);
+        this.browserApi.action.setTitle({ title: `Fasterize Status : ${self.headers['x-fstrz']}`, tabId: tabID }).catch((e) => this.logError('setTitle', e));
       }
       // warning : this part is not called in Chrome
       //  The action.onClicked event won't be sent if the extension action has specified a popup to show on click of the current tab.
       // https://developer.chrome.com/docs/extensions/reference/api/action#popup
       this.browserApi.action.onClicked.addListener(tab => {
         console.log('Fasterize extension : open popup');
-        this.browserApi.action.setPopup({ tabId: tabID, popup: 'popup/popup.html' }).catch(logError);
+        this.browserApi.action.setPopup({ tabId: tabID, popup: 'popup/popup.html' }).catch((e) => this.logError('setPopup', e));
 
         // OpenPopup is not supported by Chrome
         if (typeof this.browserApi.action.openPopup === 'function') {
@@ -235,28 +234,44 @@ class FRZRequest {
         }
       });
     } else {
-      this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath }).catch(logError);
+      this.setIcon(iconPath);
     }
   }
 
+  async setIcon(iconPath, secondTry = false) {
+        setTimeout(async () => {
+          try {
+            console.log('Fasterize extension : set icon' + JSON.stringify(this.status), this.details.tabId, iconPath);
+            await this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath });
+          }catch (e) {
+              if (secondTry) {
+                  this.logError('setIcon', e)
+                  return;
+              }
+            this.setIcon(iconPath, true);
+            console.warn('setIcon failed, retrying in 1s', e);
+          }
+        }, 2000);
+  }
+
   highlightFragments() {
-    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'highlight_fragments' }).catch(logError);
+    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'highlight_fragments' }).catch((e) => this.logError('highlight_fragments', e));
   }
 
   getFragments() {
-    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch(logError);
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch((e) => this.logError('get_fragments', e));
   }
 
   getDeferjsDebug() {
-    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch(logError);
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch((e) => this.logError('get_deferjs_debug', e));
   }
 
   getFrzFlags() {
-    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_frz_flags' }).catch(logError);
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_frz_flags' }).catch((e) => this.logError('get_frz_flags', e));
   }
 
   showLazyloadedImages() {
-    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' }).catch(logError);
+    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' }).catch((e) => this.logError('show_lazyloaded_image', e));
   }
 }
 
