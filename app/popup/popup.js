@@ -184,24 +184,23 @@ function reloadPopup(tabID) {
           getOptimizationCookie('frz_espeed', request.details.url)
               .then(optimizationCookie => {
                 if (
-                    (optimizationCookie && optimizationCookie.value === 'false') ||
+                    optimizationCookie ||
                     request.headers['x-frz-espeed']
                 ) {
-                  $('#fstrz-espeed').prop('checked', false);
-                } else {
-                  $('#fstrz-espeed').prop('checked', true);
+                  const checked = optimizationCookie ? optimizationCookie.value : request.headers['x-frz-espeed'];
+                  $('#fstrz-espeed').prop('checked', checked !== 'false');
                 }
               })
               .catch(logError);
           getOptimizationCookie('frz_eseo', request.details.url)
               .then(optimizationCookie => {
+                console.log('JULIEN seo', optimizationCookie ? optimizationCookie.value : request.headers['x-frz-eseo']);
                 if (
-                    (optimizationCookie && optimizationCookie.value === 'false') ||
+                    optimizationCookie ||
                     request.headers['x-frz-eseo']
                 ) {
-                  $('#fstrz-eseo').prop('checked', false);
-                } else {
-                  $('#fstrz-eseo').prop('checked', true);
+                  const checked = optimizationCookie ? optimizationCookie.value : request.headers['x-frz-eseo'];
+                  $('#fstrz-eseo').prop('checked', checked !== 'false');
                 }
               })
           .catch(logError);
