@@ -1,15 +1,18 @@
 /* Base Rules */
+
+
 body {
+  font-family: 'poppin';
   text-align: center;
   height: 100%;
   margin: 0;
-  background: -webkit-gradient(linear, left top, left bottom, from(#154364), to(#37778f));
-  background: -webkit-linear-gradient(top, #154364, #37778f);
-  background: linear-gradient(to bottom, #154364, #37778f);
+  background: -webkit-gradient(linear, left top, left bottom, from(#073148), to(#74d4d7));
+  background: -webkit-linear-gradient(top, #073148, #74d4d7);
+  background: linear-gradient(to bottom, #073148, #74d4d7);
   background-repeat: no-repeat;
   background-attachment: fixed;
   width: 560px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .content section {
@@ -40,6 +43,7 @@ body {
 
 .copy-button {
   height: 34px;
+  border-radius: 0px !important;
 }
 
 .input-group-addon {
@@ -92,11 +96,11 @@ input:checked + .slider:before {
 }
 
 input:checked + .slider {
-  background-color: #337ab7;
+  background-color: #073148;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #337ab7;
+  box-shadow: 0 0 1px #073148;
 }
 
 .slider.round {
@@ -155,11 +159,11 @@ input:checked + .slider-xs:before {
 }
 
 input:checked + .slider-xs {
-  background-color: #337ab7;
+  background-color: #073148;
 }
 
 input:focus + .slider-xs {
-  box-shadow: 0 0 1px #337ab7;
+  box-shadow: 0 0 1px #073148;
 }
 
 .slider-xs.round {

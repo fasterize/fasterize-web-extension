@@ -28,27 +28,41 @@
                     value="See unoptimized pages"
                     id="fstrz-false"
             />
+            <hr>
             <div id="optimized_options">
-                <div class="checkbox">
-                    <label>
-                        <input
-                                type="checkbox"
-                                id="disable-fasterize-cache"
-                                style="display:block!important"
-                        />
-                        Bypass Fasterize cache for pages
-                    </label>
+                
+                <div style="padding: 0px 10px; margin-bottom: 20px;">
+                    <div class="checkbox">
+                        <label>
+                            <input
+                                    type="checkbox"
+                                    id="disable-fasterize-cache"
+                                    style="display:block!important"
+                            />
+                            Bypass Fasterize cache for pages
+                        </label>
+                    </div>
                 </div>
-                <label class="switch-xs" for="fstrz-espeed">
-                    <input checked type="checkbox" id="fstrz-espeed" data-flag="fstrz-espeed">
-                    <span class="slider-xs round"></span>
-                </label>
-                EdgeSpeed
-                <label class="switch-xs" for="fstrz-eseo">
-                    <input checked type="checkbox" id="fstrz-eseo" data-flag="fstrz-espeed">
-                    <span class="slider-xs round"></span>
-                </label>
-                EdgeSEO
+                 <div style="text-align: left; width: 100%; padding: 0px 10px;">
+                    
+                    <span style="margin-right: 20px;">
+                    <label class="switch-xs" for="fstrz-espeed">
+                        <input checked type="checkbox" id="fstrz-espeed" data-flag="fstrz-espeed">
+                        <span class="slider-xs round"></span>
+                    </label>
+                    &nbsp;EdgeSpeed
+                    </span>
+
+                    <span>
+                    <label class="switch-xs" for="fstrz-eseo">
+                        <input checked type="checkbox" id="fstrz-eseo" data-flag="fstrz-espeed">
+                        <span class="slider-xs round"></span>
+                    </label>
+                    &nbsp;EdgeSEO
+                    </span>
+
+                </div>
+
             </div>
         </div>
     </section>
@@ -79,9 +93,9 @@
                     <div id="cdn_div">
                         <p>CDN Cache Status is <span id="cdn_status"></span></p>
                     </div>
-                    <form class="form-inline" id="debug">
+                    <form class="" id="debug">
                         <div class="input-group" id="x-unique-id-div">
-                            <div class="input-group-addon" style="width: 120px">
+                            <div class="input-group-addon" style="width: 130px">
                                 Request ID
                             </div>
                             <input id="x-unique-id" class="form-control" type="text"/>
@@ -94,7 +108,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <div class="input-group-addon" style="width: 120px">
+                            <div class="input-group-addon" style="width: 130px">
                                 Cache-Control
                             </div>
                             <input id="cache-control" class="form-control" type="text"/>
@@ -107,7 +121,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <div class="input-group-addon" style="width: 120px">
+                            <div class="input-group-addon" style="width: 130px">
                                 Cookie fstrz
                             </div>
                             <input id="cookie-fstrz" class="form-control" type="text"/>
@@ -120,7 +134,7 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <div class="input-group-addon" style="width: 120px">
+                            <div class="input-group-addon" style="width: 130px">
                                 Cookie fstrz_vary
                             </div>
                             <input
