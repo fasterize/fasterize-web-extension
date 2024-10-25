@@ -89,7 +89,7 @@ appManifestFirefox.browser_specific_settings = {
     "gecko": {
         "id": "{c1687a9a-9054-430e-94cf-2ef9b3caeb7b}",
         "update_url": "https://raw.githubusercontent.com/fasterize/fasterize-web-extension/master/app/update-manifest.json",
-        "strict_min_version": "48.0"
+        "strict_min_version": "58.0"
     }
 }
 fs.writeFileSync('./tmp/manifest.json', JSON.stringify(appManifestFirefox, null, 2));
