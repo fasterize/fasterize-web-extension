@@ -176,7 +176,12 @@ function reloadPopup(tabID) {
               if(flag === 'edge_speed' || flag === 'edge_seo') {
                   $(`#fstrz-e${flag.split('_')[1]}`).prop('checked', flags[flag]);
               }else{
-                document.getElementById(flag).checked = flags[flag];
+                const flagElement = document.getElementById(flag);
+                if(flagElement) {
+                  document.getElementById(flag).checked = flags[flag];
+                }else{
+                  console.warn(`Flag ${flag} not found`);
+                }
               }
           }
           $('#testflags table').show();
@@ -194,7 +199,6 @@ function reloadPopup(tabID) {
               .catch(logError);
           getOptimizationCookie('frz_eseo', request.details.url)
               .then(optimizationCookie => {
-                console.log('JULIEN seo', optimizationCookie ? optimizationCookie.value : request.headers['x-frz-eseo']);
                 if (
                     optimizationCookie ||
                     request.headers['x-frz-eseo']

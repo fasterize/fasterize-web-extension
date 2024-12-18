@@ -44,7 +44,6 @@
                     </div>
                 </div>
                  <div style="text-align: left; width: 100%; padding: 0px 10px;">
-                    
                     <span style="margin-right: 20px;">
                     <label class="switch-xs" for="fstrz-espeed">
                         <input checked type="checkbox" id="fstrz-espeed" data-flag="fstrz-espeed">
@@ -52,7 +51,6 @@
                     </label>
                     &nbsp;EdgeSpeed
                     </span>
-
                     <span>
                     <label class="switch-xs" for="fstrz-eseo">
                         <input checked type="checkbox" id="fstrz-eseo" data-flag="fstrz-espeed">
@@ -60,7 +58,6 @@
                     </label>
                     &nbsp;EdgeSEO
                     </span>
-
                 </div>
 
             </div>
@@ -211,7 +208,7 @@
                 <br/>
                 <br/>
                 <button class="btn btn-default" id="show-deferjs-debug">
-                    Show DeferJS trace on devtools console
+                    Show SmartJS trace on devtools console
                 </button>
                 <br/>
                 <br/>
@@ -229,7 +226,7 @@
                         <td><label class="switch-xs" for="deferjs">
                             <input type="checkbox" id="deferjs" data-flag="frz-deferjs">
                             <span class="slider-xs round"></span>
-                        </label> Defer JS</td>
+                        </label> Smart JS</td>
                         <td><label class="switch-xs" for="lazyload">
                             <input type="checkbox" id="lazyload" data-flag="frz-lazyload">
                             <span class="slider-xs round"></span>
@@ -273,13 +270,27 @@
                         <td><label class="switch-xs" for="unsharding">
                             <input type="checkbox" id="unsharding" data-flag="frz-unsharding">
                             <span class="slider-xs round"></span>
-                        </label> Unsharding</td>
+                        </label> Self Hosting</td>
                     </tr>
                     <tr>
                         <td><label class="switch-xs" for="responsive">
                             <input type="checkbox" id="responsive" data-flag="frz-responsive">
                             <span class="slider-xs round"></span>
-                        </label> Responsive</td>
+                        </label> Image Responsive</td>
+                        <td><label class="switch-xs" for="edge_rewriter">
+                            <input type="checkbox" id="edge_rewriter" data-flag="frz-edge_rewriter">
+                            <span class="slider-xs round"></span>
+                        </label> Edge Rewriter</td>
+                    </tr>
+                    <tr>
+                        <td><label class="switch-xs" for="service_worker">
+                            <input type="checkbox" id="service_worker" data-flag="frz-service_worker">
+                            <span class="slider-xs round"></span>
+                        </label> Service Worker</td>
+                        <td><label class="switch-xs" for="unlazyload">
+                            <input type="checkbox" id="unlazyload" data-flag="frz-unlazyload">
+                            <span class="slider-xs round"></span>
+                        </label> Unlazyload</td>
                     </tr>
                 </table>
                 <table></table>
