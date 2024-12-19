@@ -37,6 +37,9 @@ Debugging : go to `about:debugging#addons`.
 
 Reference is https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Debugging
 
+You need to generate a github personal access token with your github account.
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+
 # Release
 
 ### 1. Prerequisite
