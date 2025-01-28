@@ -269,9 +269,17 @@ class FRZRequest {
   getFrzFlags() {
     return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_frz_flags' }).catch((e) => this.logError('get_frz_flags', e));
   }
-
+  
   showLazyloadedImages() {
     this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' }).catch((e) => this.logError('show_lazyloaded_image', e));
+  }
+  
+  async getTargetLabel() {
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_target_label' }).catch((e) => this.logError('get_target_label', e));
+  }
+
+  async getPageType() {
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_page_type' }).catch((e) => this.logError('get_page_type', e));
   }
 }
 

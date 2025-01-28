@@ -159,6 +159,11 @@ function reloadPopup(tabID) {
         })
         .catch(logError);
 
+        Promise.all([request.getTargetLabel(), request.getPageType()]).then(([targetLabel, pageType]) => {
+          $('#page-type-fstrz').val(`${targetLabel} ${pageType ? `(${pageType})` : ''}`);
+        }).catch(logError);
+
+
       getDebugCookie(request.details.url)
         .then(debugCookie => {
           if (debugCookie && debugCookie.value === 'true') {

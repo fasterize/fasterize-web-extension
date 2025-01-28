@@ -31,6 +31,16 @@ function getFrzFlags() {
   return document.body.dataset.frzFlags && JSON.parse(document.body.dataset.frzFlags);
 }
 
+function getTargetLabel() {
+  return document.body.dataset.frzTargetLabel
+}
+
+function getPageType() {
+  const beaconScript = document.getElementById('frz-beacon-script');
+
+  return  beaconScript ? beaconScript.getAttribute('data-page-type') || '' : 'Missing beacon script';
+}
+
 browser.runtime.onMessage.addListener((request, sender) => {
   switch (request.action) {
     case 'highlight_fragments':
@@ -49,6 +59,10 @@ browser.runtime.onMessage.addListener((request, sender) => {
     case 'get_frz_flags':
       return Promise.resolve(getFrzFlags());
       break;
+    case 'get_target_label':
+      return Promise.resolve(getTargetLabel());
+    case 'get_page_type':
+      return Promise.resolve(getPageType());
     default:
       return Promise.reject('unexpected message');
   }
