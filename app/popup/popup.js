@@ -374,8 +374,8 @@ function reloadPopup(tabID) {
         .catch(logError);
     });
 
-    $('#show-deferjs-debug').on('click', () => {
-      request.getDeferjsDebug();
+    $('#show-fstrz-debug').on('click', () => {
+      request.getFstrzDebugScript();
     });
   });
 })();

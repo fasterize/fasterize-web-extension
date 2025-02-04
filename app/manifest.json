@@ -42,7 +42,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "show_deferjs_trace.js"
+        "show_fstrz_traces.js"
       ],
       "matches": [
         "<all_urls>"
