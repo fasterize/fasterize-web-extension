@@ -32,13 +32,13 @@ function getFrzFlags() {
 }
 
 function getTargetLabel() {
-  return document.body.dataset.frzTargetLabel
+  return document.body.dataset.frzTargetLabel;
 }
 
 function getPageType() {
   const beaconScript = document.getElementById('frz-beacon-script');
 
-  return  beaconScript ? beaconScript.getAttribute('data-page-type') || '' : 'Missing beacon script';
+  return beaconScript ? beaconScript.getAttribute('data-page-type') || '' : 'Missing beacon script';
 }
 
 browser.runtime.onMessage.addListener((request, sender) => {
