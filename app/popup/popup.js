@@ -159,6 +159,15 @@ function reloadPopup(tabID) {
         })
         .catch(logError);
 
+      request.getTargetLabel().then(targetLabel => {
+        $('#target-fstrz').val(targetLabel);
+      }).catch(logError);
+
+      request.getPageType().then(pageType => {
+        $('#page-type-fstrz').val(pageType);
+      }).catch(logError);
+
+
       getDebugCookie(request.details.url)
         .then(debugCookie => {
           if (debugCookie && debugCookie.value === 'true') {

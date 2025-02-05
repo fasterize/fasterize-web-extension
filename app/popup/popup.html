@@ -30,20 +30,7 @@
             />
             <hr>
             <div id="optimized_options">
-                
-                <div style="padding: 0px 10px; margin-bottom: 20px;">
-                    <div class="checkbox">
-                        <label>
-                            <input
-                                    type="checkbox"
-                                    id="disable-fasterize-cache"
-                                    style="display:block!important"
-                            />
-                            Bypass Fasterize cache for pages
-                        </label>
-                    </div>
-                </div>
-                 <div style="text-align: left; width: 100%; padding: 0px 10px;">
+                 <div style="padding: 0px 10px;">
                     <span style="margin-right: 20px;">
                     <label class="switch-xs" for="fstrz-espeed">
                         <input checked type="checkbox" id="fstrz-espeed" data-flag="fstrz-espeed">
@@ -58,6 +45,12 @@
                     </label>
                     &nbsp;EdgeSEO
                     </span>
+                    <div class="checkbox-inline" style="margin-left: 30px;">
+                        <label>
+                            <input type="checkbox" id="disable-fasterize-cache" />
+                            Bypass Fasterize cache for pages
+                        </label>
+                    </div>
                 </div>
 
             </div>
@@ -112,6 +105,41 @@
                             <div class="input-group-btn">
                                 <button
                                         data-copy-id="cache-control"
+                                        class="copy-button btn btn-primary octicon octicon-clippy"
+                                        title="Copy"
+                                ></button>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="input-group-addon" style="width: 130px">
+                                Page type
+                            </div>
+                            <input
+                                    id="page-type-fstrz"
+                                    class="form-control"
+                                    type="text"
+                            />
+                            <div class="input-group-btn">
+                                <button
+                                        data-copy-id="page-type-fstrz"
+                                        class="copy-button btn btn-primary octicon octicon-clippy"
+                                        title="Copy"
+                                ></button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-addon" style="width: 130px">
+                                Target
+                            </div>
+                            <input
+                                    id="target-fstrz"
+                                    class="form-control"
+                                    type="text"
+                            />
+                            <div class="input-group-btn">
+                                <button
+                                        data-copy-id="target-fstrz"
                                         class="copy-button btn btn-primary octicon octicon-clippy"
                                         title="Copy"
                                 ></button>
