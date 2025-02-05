@@ -13,11 +13,11 @@ function getFragments() {
   return res;
 }
 
-function getDeferjsDebug() {
+function getFstrzDebugScript() {
   var s = document.createElement('script');
   var runtimeApi = typeof browser === 'undefined' ? chrome.runtime : browser.runtime;
   s.setAttribute('type', 'text/javascript');
-  s.setAttribute('src', runtimeApi.getURL('show_deferjs_trace.js'));
+  s.setAttribute('src', runtimeApi.getURL('show_fstrz_traces.js'));
   document.body.appendChild(s);
 }
 
@@ -50,8 +50,8 @@ browser.runtime.onMessage.addListener((request, sender) => {
     case 'get_fragments':
       return Promise.resolve(getFragments());
       break;
-    case 'get_deferjs_debug':
-      return Promise.resolve(getDeferjsDebug());
+    case 'get_fstrz_debug_script_tag':
+      return Promise.resolve(getFstrzDebugScript());
       break;
     case 'show_lazyloaded_image':
       addOverlayOnLazyloadedImages();

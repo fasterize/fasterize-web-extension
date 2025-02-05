@@ -262,8 +262,8 @@ class FRZRequest {
     return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch((e) => this.logError('get_fragments', e));
   }
 
-  getDeferjsDebug() {
-    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_deferjs_debug' }).catch((e) => this.logError('get_deferjs_debug', e));
+  getFstrzDebugScript() {
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fstrz_debug_script_tag' }).catch((e) => this.logError('get_fstrz_debug_script_tag', e));
   }
 
   getFrzFlags() {
