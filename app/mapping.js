@@ -43,6 +43,7 @@ var codeMapping = {
   b: 'blocked, IP address is blocked',
   uc: 'User Canceled, request was cancelled by the user',
   pl: 'Preload headers',
+  tb: 'Too big',
 };
 
 var keycdnPOP = {
