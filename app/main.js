@@ -23,43 +23,39 @@ const processCompletedRequest = details => {
   console.log('Fasterize extension : processCompletedRequest');
   const request = new FRZRequest(details);
 
-  // Create a unique key for this tab+URL combination
-  const tabUrlKey = `${details.tabId}_${details.url}`;
+  // Check if this is a prerender request
+  const isPrerender =
+    details.documentLifecycle === 'prerender' ||
+    details.frameType === 'prerender' ||
+    (details.responseHeaders &&
+      details.responseHeaders.some(
+        header => header.name.toLowerCase() === 'purpose' && header.value.toLowerCase().includes('prerender')
+      ));
 
-  // Add timestamp to details for freshness comparison
-  const detailsWithTimestamp = {
-    ...details,
-    timestamp: Date.now(),
-  };
+  if (isPrerender) {
+    // Store prerender data separately by URL
+    browserApi.storage.local.get(['fasterize_prerender_tabs'], result => {
+      const prerenderData = result.fasterize_prerender_tabs || {};
+      prerenderData[details.url] = details;
+      browserApi.storage.local.set({ fasterize_prerender_tabs: prerenderData });
+    });
+  } else {
+    // Normal navigation - store by tabId (original behavior)
+    browserApi.storage.local.set({ [details.tabId]: details }, () => {
+      request.setPageActionIconAndPopup();
+    });
 
-  // Get the current tabs data
-  browserApi.storage.local.get(['fasterize_tabs'], result => {
-    const tabsData = result.fasterize_tabs || {};
-    const existingData = tabsData[tabUrlKey];
-
-    // Store if no existing data OR if new request is more recent
-    if (!existingData || detailsWithTimestamp.timestamp > existingData.timestamp) {
-      tabsData[tabUrlKey] = detailsWithTimestamp;
-
-      // Clean up old entries (older than 1 hour)
-      cleanupOldEntries(tabsData);
-
-      browserApi.storage.local.set({ fasterize_tabs: tabsData }, () => {
-        request.setPageActionIconAndPopup();
-      });
-    }
-  });
+    // Clear any prerender data for this tab since user has navigated
+    browserApi.storage.local.get(['fasterize_prerender_tabs'], result => {
+      const prerenderData = result.fasterize_prerender_tabs || {};
+      // Remove prerender data for the current URL if it exists
+      if (prerenderData[details.url]) {
+        delete prerenderData[details.url];
+        browserApi.storage.local.set({ fasterize_prerender_tabs: prerenderData });
+      }
+    });
+  }
 };
-
-// Clean up entries older than 1 hour to prevent storage bloat
-function cleanupOldEntries(tabsData) {
-  const oneHourAgo = Date.now() - 60 * 60 * 1000;
-  Object.keys(tabsData).forEach(key => {
-    if (tabsData[key].timestamp < oneHourAgo) {
-      delete tabsData[key];
-    }
-  });
-}
 const filter = {
   urls: ['http://*/*', 'https://*/*'],
   types: ['main_frame'],
@@ -76,28 +72,14 @@ browserApi.storage.local.get('disable-fasterize-cache', res => {
 });
 
 browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
-  // Get the current tabs data
-  browserApi.storage.local.get(['fasterize_tabs'], result => {
-    const tabsData = result.fasterize_tabs || {};
-    const keysToUpdate = {};
-    const keysToRemove = [];
-
-    // Find all entries for the removed tab and migrate them to the new tab
-    Object.keys(tabsData).forEach(key => {
-      if (key.startsWith(`${removedTabId}_`)) {
-        const url = key.substring(`${removedTabId}_`.length);
-        const newKey = `${addedTabId}_${url}`;
-        keysToUpdate[newKey] = tabsData[key];
-        keysToRemove.push(key);
-      }
-    });
-
-    // Update the tabs data
-    keysToRemove.forEach(key => delete tabsData[key]);
-    Object.assign(tabsData, keysToUpdate);
-
-    // Save updated tabs data
-    browserApi.storage.local.set({ fasterize_tabs: tabsData });
+  browserApi.storage.local.get(removedTabId.toString(), result => {
+    if (result[removedTabId]) {
+      const request = result[removedTabId];
+      browserApi.storage.local.set({ [addedTabId]: request });
+      browserApi.storage.local.remove([removedTabId.toString()]);
+    } else {
+      console.log('Fasterize extension : Could not find an entry in storage when replacing ', removedTabId);
+    }
   });
 });
 
@@ -146,22 +128,5 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 browserApi.tabs.onRemoved.addListener(tabId => {
-  // Get the current tabs data
-  browserApi.storage.local.get(['fasterize_tabs'], result => {
-    const tabsData = result.fasterize_tabs || {};
-    const keysToRemove = [];
-
-    // Find all entries for the removed tab
-    Object.keys(tabsData).forEach(key => {
-      if (key.startsWith(`${tabId}_`)) {
-        keysToRemove.push(key);
-      }
-    });
-
-    // Remove entries for this tab
-    keysToRemove.forEach(key => delete tabsData[key]);
-
-    // Save updated tabs data
-    browserApi.storage.local.set({ fasterize_tabs: tabsData });
-  });
+  browserApi.storage.local.remove([tabId.toString()]);
 });

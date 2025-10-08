@@ -121,14 +121,25 @@ function reloadPopup(tabID) {
     const tabID = tabs[0].id;
     const currentUrl = tabs[0].url;
 
-    // Create storage key based on tabId and current URL
-    const tabUrlKey = `${tabID}_${currentUrl}`;
+    // First, try to get normal navigation data (original behavior)
+    browserApi.storage.local.get([tabID.toString()], result => {
+      let details = result[tabID.toString()];
 
-    // get the extension's window object for the current URL
-    const result = await browserApi.storage.local.get(['fasterize_tabs']);
-    const tabsData = result.fasterize_tabs || {};
-    const details = tabsData[tabUrlKey];
+      // If no normal data found, check prerender data
+      if (!details) {
+        browserApi.storage.local.get(['fasterize_prerender_tabs'], prerenderResult => {
+          const prerenderData = prerenderResult.fasterize_prerender_tabs || {};
+          details = prerenderData[currentUrl];
 
+          processRequestDetails(details, tabID);
+        });
+      } else {
+        processRequestDetails(details, tabID);
+      }
+    });
+  });
+
+  function processRequestDetails(details, tabID) {
     if (!details) {
       $('#section-top').text('No request data found for this page');
       $('#section-middle').hide();
@@ -338,19 +349,22 @@ function reloadPopup(tabID) {
       const toggle = document.getElementById(featureFlagName).checked,
         flagName = document.getElementById(featureFlagName).dataset.flag;
 
-      const url = new URL(tabs[0].url);
-      const params = url.searchParams;
-      params.set(flagName, toggle);
-      const newUrl = url.toString();
+      // We need to get the current tabs again since we're in a nested function
+      browserApi.tabs.query({ active: true, windowId: browserApi.windows.WINDOW_ID_CURRENT }).then(tabs => {
+        const url = new URL(tabs[0].url);
+        const params = url.searchParams;
+        params.set(flagName, toggle);
+        const newUrl = url.toString();
 
-      // chrome doesn't reload the popup by itself, firefox reload the popup
-      if (navigator.userAgent.includes('Chrome')) {
-        browserApi.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
-          return reloadPopup(tabID);
-        });
-      }
+        // chrome doesn't reload the popup by itself, firefox reload the popup
+        if (navigator.userAgent.includes('Chrome')) {
+          browserApi.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
+            return reloadPopup(tabID);
+          });
+        }
 
-      browserApi.tabs.update(tabID, { url: newUrl }).catch(logError);
+        browserApi.tabs.update(tabID, { url: newUrl }).catch(logError);
+      });
     }
 
     $('#getFragments').on('click', () => {
@@ -392,5 +406,5 @@ function reloadPopup(tabID) {
     $('#show-fstrz-debug').on('click', () => {
       request.getFstrzDebugScript();
     });
-  });
+  }
 })();
