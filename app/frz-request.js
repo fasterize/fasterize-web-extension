@@ -1,12 +1,8 @@
 // the FRZRequest object, contains information about a request
 class FRZRequest {
   constructor(details) {
-    if (!details) {
-      throw new Error('FRZRequest: details parameter is required');
-    }
-
     this.details = details;
-    this.headersRaw = details.responseHeaders || [];
+    this.headersRaw = details.responseHeaders;
 
     // headers will be stored as name: value pairs (all names will be upper case)
     this.headers = {};
@@ -221,18 +217,14 @@ class FRZRequest {
     if (this.servedByFasterize()) {
       this.setIcon(iconPath);
       if (self.headers['x-fstrz']) {
-        this.browserApi.action
-          .setTitle({ title: `Fasterize Status : ${self.headers['x-fstrz']}`, tabId: tabID })
-          .catch(e => this.logError('setTitle', e));
+        this.browserApi.action.setTitle({ title: `Fasterize Status : ${self.headers['x-fstrz']}`, tabId: tabID }).catch((e) => this.logError('setTitle', e));
       }
       // warning : this part is not called in Chrome
       //  The action.onClicked event won't be sent if the extension action has specified a popup to show on click of the current tab.
       // https://developer.chrome.com/docs/extensions/reference/api/action#popup
       this.browserApi.action.onClicked.addListener(tab => {
         console.log('Fasterize extension : open popup');
-        this.browserApi.action
-          .setPopup({ tabId: tabID, popup: 'popup/popup.html' })
-          .catch(e => this.logError('setPopup', e));
+        this.browserApi.action.setPopup({ tabId: tabID, popup: 'popup/popup.html' }).catch((e) => this.logError('setPopup', e));
 
         // OpenPopup is not supported by Chrome
         if (typeof this.browserApi.action.openPopup === 'function') {
@@ -247,61 +239,47 @@ class FRZRequest {
   }
 
   async setIcon(iconPath, secondTry = false) {
-    setTimeout(async () => {
-      try {
-        console.log('Fasterize extension : set icon' + JSON.stringify(this.status), this.details.tabId, iconPath);
-        await this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath });
-      } catch (e) {
-        if (secondTry) {
-          this.logError('setIcon', e);
-          return;
-        }
-        this.setIcon(iconPath, true);
-        console.warn('setIcon failed, retrying in 1s', e);
-      }
-    }, 2000);
+        setTimeout(async () => {
+          try {
+            console.log('Fasterize extension : set icon' + JSON.stringify(this.status), this.details.tabId, iconPath);
+            await this.browserApi.action.setIcon({ tabId: this.details.tabId, path: iconPath });
+          }catch (e) {
+              if (secondTry) {
+                  this.logError('setIcon', e)
+                  return;
+              }
+            this.setIcon(iconPath, true);
+            console.warn('setIcon failed, retrying in 1s', e);
+          }
+        }, 2000);
   }
 
   highlightFragments() {
-    this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'highlight_fragments' })
-      .catch(e => this.logError('highlight_fragments', e));
+    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'highlight_fragments' }).catch((e) => this.logError('highlight_fragments', e));
   }
 
   getFragments() {
-    return this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'get_fragments' })
-      .catch(e => this.logError('get_fragments', e));
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fragments' }).catch((e) => this.logError('get_fragments', e));
   }
 
   getFstrzDebugScript() {
-    return this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'get_fstrz_debug_script_tag' })
-      .catch(e => this.logError('get_fstrz_debug_script_tag', e));
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_fstrz_debug_script_tag' }).catch((e) => this.logError('get_fstrz_debug_script_tag', e));
   }
 
   getFrzFlags() {
-    return this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'get_frz_flags' })
-      .catch(e => this.logError('get_frz_flags', e));
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_frz_flags' }).catch((e) => this.logError('get_frz_flags', e));
   }
-
+  
   showLazyloadedImages() {
-    this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' })
-      .catch(e => this.logError('show_lazyloaded_image', e));
+    this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'show_lazyloaded_image' }).catch((e) => this.logError('show_lazyloaded_image', e));
   }
-
+  
   async getTargetLabel() {
-    return this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'get_target_label' })
-      .catch(e => this.logError('get_target_label', e));
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_target_label' }).catch((e) => this.logError('get_target_label', e));
   }
 
   async getPageType() {
-    return this.browserApi.tabs
-      .sendMessage(this.details.tabId, { action: 'get_page_type' })
-      .catch(e => this.logError('get_page_type', e));
+    return this.browserApi.tabs.sendMessage(this.details.tabId, { action: 'get_page_type' }).catch((e) => this.logError('get_page_type', e));
   }
 }
 
