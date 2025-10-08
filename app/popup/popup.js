@@ -119,34 +119,9 @@ function reloadPopup(tabID) {
 
   browserApi.tabs.query(queryInfo).then(async tabs => {
     const tabID = tabs[0].id;
-    const currentUrl = tabs[0].url;
-
-    // First, try to get normal navigation data (original behavior)
-    browserApi.storage.local.get([tabID.toString()], result => {
-      let details = result[tabID.toString()];
-
-      // If no normal data found, check prerender data
-      if (!details) {
-        const prerenderKey = `fasterize_prerender_${tabID}`;
-        browserApi.storage.local.get([prerenderKey], prerenderResult => {
-          details = prerenderResult[prerenderKey];
-
-          processRequestDetails(details, tabID);
-        });
-      } else {
-        processRequestDetails(details, tabID);
-      }
-    });
-  });
-
-  function processRequestDetails(details, tabID) {
-    if (!details) {
-      $('#section-top').text('No request data found for this page');
-      $('#section-middle').hide();
-      $('#section-bottom').hide();
-      return;
-    }
-
+    // get the extension's window object
+    const details = (await browserApi.storage.local.get([tabID.toString()]))[tabID];
+    console.log('Fasterize extension : popup opened for tabId ', tabID, details);
     const request = new FRZRequest(details);
     // throw new Error(`Not implemented ${tabID.toString()} + ${JSON.stringify(request.headers)}`);
 
@@ -349,22 +324,19 @@ function reloadPopup(tabID) {
       const toggle = document.getElementById(featureFlagName).checked,
         flagName = document.getElementById(featureFlagName).dataset.flag;
 
-      // We need to get the current tabs again since we're in a nested function
-      browserApi.tabs.query({ active: true, windowId: browserApi.windows.WINDOW_ID_CURRENT }).then(tabs => {
-        const url = new URL(tabs[0].url);
-        const params = url.searchParams;
-        params.set(flagName, toggle);
-        const newUrl = url.toString();
+      const url = new URL(tabs[0].url);
+      const params = url.searchParams;
+      params.set(flagName, toggle);
+      const newUrl = url.toString();
 
-        // chrome doesn't reload the popup by itself, firefox reload the popup
-        if (navigator.userAgent.includes('Chrome')) {
-          browserApi.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
-            return reloadPopup(tabID);
-          });
-        }
+      // chrome doesn't reload the popup by itself, firefox reload the popup
+      if (navigator.userAgent.includes('Chrome')) {
+        browserApi.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
+          return reloadPopup(tabID);
+        });
+      }
 
-        browserApi.tabs.update(tabID, { url: newUrl }).catch(logError);
-      });
+      browserApi.tabs.update(tabID, { url: newUrl }).catch(logError);
     }
 
     $('#getFragments').on('click', () => {
@@ -406,5 +378,5 @@ function reloadPopup(tabID) {
     $('#show-fstrz-debug').on('click', () => {
       request.getFstrzDebugScript();
     });
-  }
+  });
 })();

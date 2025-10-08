@@ -32,6 +32,8 @@ const processCompletedRequest = details => {
         header => header.name.toLowerCase() === 'purpose' && header.value.toLowerCase().includes('prerender')
       ));
 
+  console.log('Fasterize extension : isPrerender = ', isPrerender, details);
+
   if (isPrerender) {
     // Store prerender data separately by tabId
     const prerenderKey = `fasterize_prerender_${details.tabId}`;
@@ -63,6 +65,8 @@ browserApi.storage.local.get('disable-fasterize-cache', res => {
 });
 
 browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+  // TODO remove log
+  console.log('Fasterize extension : tab replaced', addedTabId, removedTabId);
   // TODO : Keep legacy behavior ? For page instanct or other cases ?
   // Move normal navigation data
   browserApi.storage.local.get(removedTabId.toString(), result => {
@@ -77,12 +81,20 @@ browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
 
   const oldPrerenderKey = `fasterize_prerender_${removedTabId}`;
 
+  console.log('Fasterize extension : Check prerender data for ', oldPrerenderKey);
   browserApi.storage.local.get([oldPrerenderKey], result => {
     if (result[oldPrerenderKey]) {
+      // TODO must contains a dictionnary with url as key because there may be several prerender
       const prerenderData = result[oldPrerenderKey];
       // Move to tabId key because the navigation is done
       browserApi.storage.local.set({ [addedTabId]: prerenderData });
       browserApi.storage.local.remove([oldPrerenderKey]);
+      console.log(
+        'Fasterize extension : Prerender data has been set with values ',
+        prerenderData,
+        ' on tabId ',
+        addedTabId
+      );
 
       // If the navigation is prerender, create FRZRequest and set icon
       const request = new FRZRequest(prerenderData);
@@ -136,6 +148,7 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 browserApi.tabs.onRemoved.addListener(tabId => {
+  console.log('Fasterize extension : tab closed', tabId);
   // Remove normal navigation data
   browserApi.storage.local.remove([tabId.toString()]);
 
