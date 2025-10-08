@@ -23,7 +23,7 @@ const processCompletedRequest = details => {
   console.log('Fasterize extension : processCompletedRequest');
   const request = new FRZRequest(details);
 
-  // Check if this is a prerender request
+  // TODO refactor in a function
   const isPrerender =
     details.documentLifecycle === 'prerender' ||
     details.frameType === 'prerender' ||
@@ -34,18 +34,25 @@ const processCompletedRequest = details => {
 
   console.log('Fasterize extension : isPrerender = ', isPrerender, details);
 
+  const prerenderKey = `fasterize_prerender_${details.tabId}`;
   if (isPrerender) {
-    // Store prerender data separately by tabId
-    const prerenderKey = `fasterize_prerender_${details.tabId}`;
-    browserApi.storage.local.set({ [prerenderKey]: details });
+    // TODO refactor in a function
+    browserApi.storage.local.get(prerenderKey, result => {
+      if (!result[prerenderKey]) {
+        browserApi.storage.local.set({ [prerenderKey]: { [details.url]: details } });
+
+        return;
+      }
+
+      result[prerenderKey][details.url] = details;
+
+      browserApi.storage.local.set({ [prerenderKey]: result[prerenderKey] });
+    });
   } else {
-    // Normal navigation - store by tabId (original behavior)
     browserApi.storage.local.set({ [details.tabId]: details }, () => {
       request.setPageActionIconAndPopup();
     });
 
-    // Clear any prerender data for this tab since user has navigated
-    const prerenderKey = `fasterize_prerender_${details.tabId}`;
     browserApi.storage.local.remove([prerenderKey]);
   }
 };
@@ -149,10 +156,40 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 browserApi.tabs.onRemoved.addListener(tabId => {
   console.log('Fasterize extension : tab closed', tabId);
-  // Remove normal navigation data
   browserApi.storage.local.remove([tabId.toString()]);
 
-  // Remove prerender data
   const prerenderKey = `fasterize_prerender_${tabId}`;
   browserApi.storage.local.remove([prerenderKey]);
+});
+
+// TODO refactor in functions
+browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log('Fasterize extension : tab updated', tabId, changeInfo, tab);
+  if (changeInfo.status === 'complete') {
+    // TODO rewrite use then
+    browserApi.storage.local.get([tabId.toString(), `fasterize_prerender_${tabId}`], result => {
+      const prerenderStore = result[`fasterize_prerender_${tabId}`];
+      if (prerenderStore && prerenderStore[tab.url]) {
+        console.log(
+          'Fasterize extension : Found prerender data for this tab',
+          tabId,
+          tab.url,
+          prerenderStore,
+          result[tabId],
+          result[tabId]?.timeStamp,
+          prerenderStore[tab.url]?.timeStamp,
+          result[tabId]?.timeStamp < prerenderStore[tab.url]?.timeStamp,
+          !result[tabId] || result[tabId]?.timeStamp < prerenderStore[tab.url].timeStamp
+        );
+        if (!result[tabId] || result[tabId].timeStamp < prerenderStore[tab.url].timeStamp) {
+          console.log('Fasterize extension : Use prerender data for this tab', tabId, tab.url, prerenderStore);
+          browserApi.storage.local.set({ [tabId]: prerenderStore[tab.url] }, () => {
+            console.log('Fasterize extension : Set prerender data for this tab', tabId, tab.url, prerenderStore);
+            new FRZRequest(prerenderStore[tab.url]).setPageActionIconAndPopup();
+          });
+        }
+      }
+      browserApi.storage.local.remove([`fasterize_prerender_${tabId}`]);
+    });
+  }
 });
