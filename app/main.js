@@ -18,7 +18,6 @@ if (isChrome) {
     }
   });
 }
-
 const isPrerenderedRequest = details => {
   return (
     details.documentLifecycle === 'prerender' ||
@@ -145,7 +144,7 @@ const handlePrerenderedNavigation = (tabId, changeInfo, tab) => {
     return;
   }
 
-  browserApi.storage.local
+  return browserApi.storage.local
     .get([tabId.toString(), `fasterize_prerender_${tabId}`])
     .then(result => {
       const prerenderStore = result[`fasterize_prerender_${tabId}`];
@@ -167,7 +166,26 @@ const handlePrerenderedNavigation = (tabId, changeInfo, tab) => {
     });
 };
 
+/**
+ * On firefox, the request may have a tabId of -1 in webRequest.onCompleted
+ * We refresh to ensure the icon is set when the tab is fully loaded
+ */
+refreshStatusForFirefox = (tabId, changeInfo) => {
+  if (isChrome || changeInfo.status !== 'complete') {
+    return;
+  }
+
+  return browserApi.storage.local.get(tabId.toString()).then(result => {
+    if (result[tabId] && result[tabId].tabId !== -1) {
+      console.log('Fasterize extension : refresh status', tabId);
+      new FRZRequest(result[tabId]).setPageActionIconAndPopup();
+    }
+  });
+};
+
 browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log('Fasterize extension : tab updated', tabId, changeInfo, tab);
   handlePrerenderedNavigation(tabId, changeInfo, tab);
+
+  refreshStatusForFirefox(tabId, changeInfo);
 });

@@ -214,6 +214,11 @@ class FRZRequest {
       return;
     }
 
+    if (tabID === -1) {
+      console.warn('Invalid tab ID (-1), cannot set icon or popup.');
+      return;
+    }
+
     if (this.servedByFasterize()) {
       this.setIcon(iconPath);
       if (self.headers['x-fstrz']) {
