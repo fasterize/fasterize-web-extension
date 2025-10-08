@@ -19,24 +19,24 @@ if (isChrome) {
   });
 }
 
-const processCompletedRequest = details => {
-  console.log('Fasterize extension : processCompletedRequest');
-  const request = new FRZRequest(details);
-
-  // TODO refactor in a function
-  const isPrerender =
+const isPrerenderedRequest = details => {
+  return (
     details.documentLifecycle === 'prerender' ||
     details.frameType === 'prerender' ||
     (details.responseHeaders &&
       details.responseHeaders.some(
         header => header.name.toLowerCase() === 'purpose' && header.value.toLowerCase().includes('prerender')
-      ));
+      ))
+  );
+};
 
-  console.log('Fasterize extension : isPrerender = ', isPrerender, details);
-
+const processCompletedRequest = details => {
+  console.log('Fasterize extension : webRequest.onCompleted triggered', details);
+  const request = new FRZRequest(details);
   const prerenderKey = `fasterize_prerender_${details.tabId}`;
-  if (isPrerender) {
-    // TODO refactor in a function
+
+  if (isPrerenderedRequest(details)) {
+    console.log('Fasterize extension : store prerendered navigation', details.url, details);
     browserApi.storage.local.get(prerenderKey, result => {
       if (!result[prerenderKey]) {
         browserApi.storage.local.set({ [prerenderKey]: { [details.url]: details } });
@@ -71,11 +71,12 @@ browserApi.storage.local.get('disable-fasterize-cache', res => {
   shouldDisableFasterizeCache = res['disable-fasterize-cache'] || false;
 });
 
+/**
+ * This event is not relevant anymore since we handle prerendered navigation in tabs.onUpdated
+ * Keeping it for old chrom versions that may not support tabs.onUpdated
+ */
 browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
-  // TODO remove log
-  console.log('Fasterize extension : tab replaced', addedTabId, removedTabId);
-  // TODO : Keep legacy behavior ? For page instanct or other cases ?
-  // Move normal navigation data
+  console.log('Fasterize extension : tabs.onReplaced', addedTabId, removedTabId);
   browserApi.storage.local.get(removedTabId.toString(), result => {
     if (result[removedTabId]) {
       const request = result[removedTabId];
@@ -83,29 +84,6 @@ browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
       browserApi.storage.local.remove([removedTabId.toString()]);
     } else {
       console.log('Fasterize extension : Could not find an entry in storage when replacing ', removedTabId);
-    }
-  });
-
-  const oldPrerenderKey = `fasterize_prerender_${removedTabId}`;
-
-  console.log('Fasterize extension : Check prerender data for ', oldPrerenderKey);
-  browserApi.storage.local.get([oldPrerenderKey], result => {
-    if (result[oldPrerenderKey]) {
-      // TODO must contains a dictionnary with url as key because there may be several prerender
-      const prerenderData = result[oldPrerenderKey];
-      // Move to tabId key because the navigation is done
-      browserApi.storage.local.set({ [addedTabId]: prerenderData });
-      browserApi.storage.local.remove([oldPrerenderKey]);
-      console.log(
-        'Fasterize extension : Prerender data has been set with values ',
-        prerenderData,
-        ' on tabId ',
-        addedTabId
-      );
-
-      // If the navigation is prerender, create FRZRequest and set icon
-      const request = new FRZRequest(prerenderData);
-      request.setPageActionIconAndPopup();
     }
   });
 });
@@ -162,34 +140,34 @@ browserApi.tabs.onRemoved.addListener(tabId => {
   browserApi.storage.local.remove([prerenderKey]);
 });
 
-// TODO refactor in functions
-browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log('Fasterize extension : tab updated', tabId, changeInfo, tab);
-  if (changeInfo.status === 'complete') {
-    // TODO rewrite use then
-    browserApi.storage.local.get([tabId.toString(), `fasterize_prerender_${tabId}`], result => {
+const handlePrerenderedNavigation = (tabId, changeInfo, tab) => {
+  if (changeInfo.status !== 'complete') {
+    return;
+  }
+
+  browserApi.storage.local
+    .get([tabId.toString(), `fasterize_prerender_${tabId}`])
+    .then(result => {
       const prerenderStore = result[`fasterize_prerender_${tabId}`];
-      if (prerenderStore && prerenderStore[tab.url]) {
-        console.log(
-          'Fasterize extension : Found prerender data for this tab',
-          tabId,
-          tab.url,
-          prerenderStore,
-          result[tabId],
-          result[tabId]?.timeStamp,
-          prerenderStore[tab.url]?.timeStamp,
-          result[tabId]?.timeStamp < prerenderStore[tab.url]?.timeStamp,
-          !result[tabId] || result[tabId]?.timeStamp < prerenderStore[tab.url].timeStamp
-        );
-        if (!result[tabId] || result[tabId].timeStamp < prerenderStore[tab.url].timeStamp) {
-          console.log('Fasterize extension : Use prerender data for this tab', tabId, tab.url, prerenderStore);
-          browserApi.storage.local.set({ [tabId]: prerenderStore[tab.url] }, () => {
-            console.log('Fasterize extension : Set prerender data for this tab', tabId, tab.url, prerenderStore);
-            new FRZRequest(prerenderStore[tab.url]).setPageActionIconAndPopup();
-          });
-        }
+      if (!prerenderStore || !prerenderStore[tab.url]) {
+        return;
       }
+
+      const currentTabRequest = result[tabId];
+      // Only consider the prerendered navigation if it's newer than the current one
+      if (!currentTabRequest || currentTabRequest.timeStamp < prerenderStore[tab.url].timeStamp) {
+        return browserApi.storage.local
+          .set({ [tabId]: prerenderStore[tab.url] })
+          .then(() => new FRZRequest(prerenderStore[tab.url]).setPageActionIconAndPopup());
+      }
+    })
+    .catch(e => console.log('Fasterize extension : error handling tab update', e))
+    .finally(() => {
       browserApi.storage.local.remove([`fasterize_prerender_${tabId}`]);
     });
-  }
+};
+
+browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log('Fasterize extension : tab updated', tabId, changeInfo, tab);
+  handlePrerenderedNavigation(tabId, changeInfo, tab);
 });
