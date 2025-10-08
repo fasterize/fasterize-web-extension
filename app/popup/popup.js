@@ -127,9 +127,9 @@ function reloadPopup(tabID) {
 
       // If no normal data found, check prerender data
       if (!details) {
-        browserApi.storage.local.get(['fasterize_prerender_tabs'], prerenderResult => {
-          const prerenderData = prerenderResult.fasterize_prerender_tabs || {};
-          details = prerenderData[currentUrl];
+        const prerenderKey = `fasterize_prerender_${tabID}`;
+        browserApi.storage.local.get([prerenderKey], prerenderResult => {
+          details = prerenderResult[prerenderKey];
 
           processRequestDetails(details, tabID);
         });

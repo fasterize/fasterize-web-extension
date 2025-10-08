@@ -33,12 +33,9 @@ const processCompletedRequest = details => {
       ));
 
   if (isPrerender) {
-    // Store prerender data separately by URL
-    browserApi.storage.local.get(['fasterize_prerender_tabs'], result => {
-      const prerenderData = result.fasterize_prerender_tabs || {};
-      prerenderData[details.url] = details;
-      browserApi.storage.local.set({ fasterize_prerender_tabs: prerenderData });
-    });
+    // Store prerender data separately by tabId
+    const prerenderKey = `fasterize_prerender_${details.tabId}`;
+    browserApi.storage.local.set({ [prerenderKey]: details });
   } else {
     // Normal navigation - store by tabId (original behavior)
     browserApi.storage.local.set({ [details.tabId]: details }, () => {
@@ -46,14 +43,8 @@ const processCompletedRequest = details => {
     });
 
     // Clear any prerender data for this tab since user has navigated
-    browserApi.storage.local.get(['fasterize_prerender_tabs'], result => {
-      const prerenderData = result.fasterize_prerender_tabs || {};
-      // Remove prerender data for the current URL if it exists
-      if (prerenderData[details.url]) {
-        delete prerenderData[details.url];
-        browserApi.storage.local.set({ fasterize_prerender_tabs: prerenderData });
-      }
-    });
+    const prerenderKey = `fasterize_prerender_${details.tabId}`;
+    browserApi.storage.local.remove([prerenderKey]);
   }
 };
 const filter = {
@@ -72,6 +63,8 @@ browserApi.storage.local.get('disable-fasterize-cache', res => {
 });
 
 browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+  // TODO : Keep legacy behavior ? For page instanct or other cases ?
+  // Move normal navigation data
   browserApi.storage.local.get(removedTabId.toString(), result => {
     if (result[removedTabId]) {
       const request = result[removedTabId];
@@ -79,6 +72,21 @@ browserApi.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
       browserApi.storage.local.remove([removedTabId.toString()]);
     } else {
       console.log('Fasterize extension : Could not find an entry in storage when replacing ', removedTabId);
+    }
+  });
+
+  const oldPrerenderKey = `fasterize_prerender_${removedTabId}`;
+
+  browserApi.storage.local.get([oldPrerenderKey], result => {
+    if (result[oldPrerenderKey]) {
+      const prerenderData = result[oldPrerenderKey];
+      // Move to tabId key because the navigation is done
+      browserApi.storage.local.set({ [addedTabId]: prerenderData });
+      browserApi.storage.local.remove([oldPrerenderKey]);
+
+      // If the navigation is prerender, create FRZRequest and set icon
+      const request = new FRZRequest(prerenderData);
+      request.setPageActionIconAndPopup();
     }
   });
 });
@@ -128,5 +136,10 @@ browserApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 browserApi.tabs.onRemoved.addListener(tabId => {
+  // Remove normal navigation data
   browserApi.storage.local.remove([tabId.toString()]);
+
+  // Remove prerender data
+  const prerenderKey = `fasterize_prerender_${tabId}`;
+  browserApi.storage.local.remove([prerenderKey]);
 });
