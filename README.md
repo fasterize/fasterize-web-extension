@@ -16,6 +16,31 @@ Chrome and Firefox web extension for Fasterize
 
     npm install && npm run dev
 
+## Prerender Navigation Handling
+
+The extension handles prerendered page navigation to ensure accurate Fasterize status detection. Modern browsers support page prerendering for performance optimization, which can affect how the extension tracks page loads.
+
+### How it works:
+
+1. **Detection**: The extension detects prerendered requests by checking:
+
+   - `documentLifecycle === 'prerender'`
+   - `frameType === 'prerender'`
+   - Response headers containing `Purpose: prerender`
+
+2. **Storage**: Prerendered navigation data is temporarily stored using the key pattern `fasterize_prerender_{tabId}` in local storage.
+
+3. **Navigation**: When a tab completes loading (`tabs.onUpdated` with `status: 'complete'`), the extension:
+
+   - Checks if there's stored prerendered data for the current URL
+   - Compares timestamps to ensure the prerendered navigation is newer than any existing navigation data
+   - Updates the tab's Fasterize status if the prerendered navigation is more recent
+   - Cleans up temporary prerender storage
+
+4. **Fallback**: For older Chrome versions, `tabs.onReplaced` provides fallback handling for prerendered tab replacement.
+
+This ensures that the extension icon and popup correctly reflect the Fasterize status even when pages are preloaded in the background.
+
 ## Chrome
 
 Load the `app` directory into chrome (go to chrome://extensions/ and click on "Load unpacked extension").
@@ -43,6 +68,7 @@ https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/m
 # Release
 
 ### 1. Prerequisite
+
 You need to have `hub` installed to do the release and grunt `npm install -g grunt`
 
 On OSX, just run `brew install hub`. On Ubuntu :
@@ -53,49 +79,23 @@ sudo apt-get update
 sudo apt-get install hub
 ```
 
-The command `npm run release` publish on Chrome Web Store and sign the extension on Mozilla Addon Store. The firefox extension is released on github.    
+The command `npm run release` publish on Chrome Web Store and sign the extension on Mozilla Addon Store. The firefox extension is released on github.
 
 ### 2. Manifest
+
 The release script will <b>automatically</b> change manisfest.json. Because Firefox doesn't support "service_worker" but chrome needs it for Manifest V3.
 
-Manifest for firefox : 
-``
-"action": {
-"default_title": "Fasterize",
-"default_icon": "icons/store/icon.png"
-},
-"background": {
-"scripts": [
-"mapping.js",
-"frz-request.js",
-"main.js"
-]
-},
-"browser_specific_settings": {
-"gecko": {
-"id": "{c1687a9a-9054-430e-94cf-2ef9b3caeb7b}",
-"update_url": "https://raw.githubusercontent.com/fasterize/fasterize-web-extension/master/app/update-manifest.json",
-"strict_min_version": "58.0"
-}
-}``
-
+Manifest for firefox :
+`"action": { "default_title": "Fasterize", "default_icon": "icons/store/icon.png" }, "background": { "scripts": [ "mapping.js", "frz-request.js", "main.js" ] }, "browser_specific_settings": { "gecko": { "id": "{c1687a9a-9054-430e-94cf-2ef9b3caeb7b}", "update_url": "https://raw.githubusercontent.com/fasterize/fasterize-web-extension/master/app/update-manifest.json", "strict_min_version": "58.0" } }`
 
 Manifest for chrome :
-``
-"action": {
-"default_popup": "popup/popup.html",
-"default_title": "Fasterize",
-"default_icon": "icons/store/icon.png"
-},
-"background": {
-"service_worker": "main.js"
-}``
+`"action": { "default_popup": "popup/popup.html", "default_title": "Fasterize", "default_icon": "icons/store/icon.png" }, "background": { "service_worker": "main.js" }`
 
 ### 3. Release
+
 This command will sign the extension on Mozilla Addon Store. The firefox extension is released on github. The chrome extension is not directly published on Chrome Web Store.
 It will create a build and a zip file in the `dist/chrome` directory. You have to publish the zip file on the Chrome Web Store manually at https://chrome.google.com/webstore/devconsole/d47c0dfe-54f9-41c3-a785-e868a9854aa6
- 
+
 ```
 MOZILLA_API_KEY=X MOZILLA_API_SECRET=X GITHUB_TOKEN=X node release.js {version}
 ```
-

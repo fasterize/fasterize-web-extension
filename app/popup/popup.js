@@ -121,6 +121,12 @@ function reloadPopup(tabID) {
     const tabID = tabs[0].id;
     // get the extension's window object
     const details = (await browserApi.storage.local.get([tabID.toString()]))[tabID];
+
+    if (!details) {
+      console.warn('Fasterize extension : no request details found for this tab', tabID);
+      return;
+    }
+
     const request = new FRZRequest(details);
     // throw new Error(`Not implemented ${tabID.toString()} + ${JSON.stringify(request.headers)}`);
 
