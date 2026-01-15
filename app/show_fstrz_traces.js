@@ -17,5 +17,11 @@ if (fasterizeNs) {
     console.dir(fasterizeNs.lazyloadJsNs.logs);
     console.log('------ Fasterize LazyloadJS logs ------');
   }
+
+  if (fasterizeNs.smartInpNs) {
+    console.log('------ Fasterize SmartInp logs ------');
+    console.dir(fasterizeNs.smartInpNs.logs);
+    console.log('------ Fasterize SmartInp logs ------');
+  }
 }
 console.log('------ Fasterize logs ------');
