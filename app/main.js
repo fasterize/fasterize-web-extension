@@ -1,13 +1,13 @@
 // Check chrome
+try {
+  importScripts('mapping.js', 'frz-request.js');
+} catch (e) {
+  console.log(e);
+}
+
 const isChrome = typeof browser === 'undefined';
 const browserApi = isChrome ? chrome : browser;
-if (isChrome) {
-  try {
-    importScripts('mapping.js', 'frz-request.js');
-  } catch (e) {
-    console.log(e);
-  }
-} else {
+if (!isChrome) {
   // To ask " Access your data for all websites " permission on Firefox
   browser.permissions.getAll().then(permissions => {
     if (permissions.origins.indexOf('<all_urls>') === -1) {
