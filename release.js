@@ -71,6 +71,8 @@ fsExtra.copySync('app', 'tmp');
 const appManifestFirefox = require('./tmp/manifest.json');
 // incognito split is not allowed on firefox.
 delete appManifestFirefox.incognito;
+// externally_connectable is Chrome-only (not supported by Firefox).
+delete appManifestFirefox.externally_connectable;
 // Firefox can open popup with openPopup() method. And we need to ask permission to access all urls.
 appManifestFirefox.action = {
     "default_title": "Fasterize",

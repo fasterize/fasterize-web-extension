@@ -137,6 +137,12 @@ browserApi.tabs.onRemoved.addListener(tabId => {
 
   const prerenderKey = `fasterize_prerender_${tabId}`;
   browserApi.storage.local.remove([prerenderKey]);
+
+  // Picker: cleanup session if picker tab was closed
+  if (activePickerSession && activePickerSession.pickerTabId === tabId) {
+    activePickerSession.sendResponse({ success: false });
+    activePickerSession = null;
+  }
 });
 
 const handlePrerenderedNavigation = (tabId, changeInfo, tab) => {
@@ -189,3 +195,113 @@ browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
   refreshStatusForFirefox(tabId, changeInfo);
 });
+
+// ─── CSS Selector Picker ────────────────────────────────────────────────────
+// Allows the dashboard to open a visual element picker on any page.
+// Communication: dashboard → onMessageExternal → open window → inject picker-content.js
+//                picker-content.js → onMessage → relay result back to dashboard
+
+let activePickerSession = null;
+
+// External messages from the dashboard (via externally_connectable)
+browserApi.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+  if (message.type === 'FSTRZ_PING') {
+    sendResponse({ type: 'FSTRZ_PONG' });
+    return false;
+  }
+
+  if (message.type === 'FSTRZ_OPEN_PICKER') {
+    handleOpenPicker(message, sender.tab ? sender.tab.id : undefined, sendResponse);
+    return true; // Keep channel open for async response
+  }
+
+  return false;
+});
+
+// Internal messages from picker-content.js (selector picked or cancelled)
+// Uses message.type (not message.action) so no conflict with existing handler
+browserApi.runtime.onMessage.addListener((message, sender) => {
+  if (!activePickerSession) return;
+
+  if (message.type === 'FSTRZ_SELECTOR_PICKED' && sender.tab && sender.tab.id === activePickerSession.pickerTabId) {
+    activePickerSession.sendResponse({
+      success: true,
+      selector: message.selector,
+      previewText: message.previewText,
+      matchCount: message.matchCount,
+    });
+    browserApi.windows.remove(activePickerSession.pickerWindowId).catch(() => {});
+    activePickerSession = null;
+  } else if (message.type === 'FSTRZ_PICK_CANCELLED' && sender.tab && sender.tab.id === activePickerSession.pickerTabId) {
+    activePickerSession.sendResponse({ success: false });
+    browserApi.windows.remove(activePickerSession.pickerWindowId).catch(() => {});
+    activePickerSession = null;
+  }
+});
+
+// Re-inject picker if user navigates within the picker tab
+browserApi.webNavigation.onCompleted.addListener(details => {
+  if (!activePickerSession || details.tabId !== activePickerSession.pickerTabId) return;
+  if (details.frameId !== 0) return; // Main frame only
+  injectPicker(details.tabId);
+});
+
+async function handleOpenPicker(message, dashboardTabId, sendResponse) {
+  // Validate URL
+  let parsed;
+  try {
+    parsed = new URL(message.url);
+  } catch (e) {
+    parsed = null;
+  }
+  if (!parsed || (parsed.protocol !== 'https:' && parsed.protocol !== 'http:')) {
+    sendResponse({ success: false });
+    return;
+  }
+
+  // Cancel existing session
+  if (activePickerSession) {
+    try {
+      await browserApi.windows.remove(activePickerSession.pickerWindowId);
+    } catch (e) { /* window may already be closed */ }
+    activePickerSession.sendResponse({ success: false });
+    activePickerSession = null;
+  }
+
+  // Create new window with target URL
+  try {
+    const win = await browserApi.windows.create({
+      url: message.url,
+      type: 'normal',
+      focused: true,
+    });
+
+    const tabId = win.tabs && win.tabs[0] ? win.tabs[0].id : undefined;
+    if (!tabId || !win.id) {
+      sendResponse({ success: false });
+      return;
+    }
+
+    activePickerSession = {
+      dashboardTabId: dashboardTabId,
+      pickerTabId: tabId,
+      pickerWindowId: win.id,
+      sendResponse: sendResponse,
+    };
+  } catch (e) {
+    console.log('Fasterize extension : failed to open picker window', e);
+    sendResponse({ success: false });
+  }
+}
+
+async function injectPicker(tabId) {
+  try {
+    await browserApi.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['picker-content.js'],
+    });
+    await browserApi.tabs.sendMessage(tabId, { type: 'FSTRZ_ACTIVATE_PICKER' });
+  } catch (e) {
+    console.log('Fasterize extension : failed to inject picker', e);
+  }
+}

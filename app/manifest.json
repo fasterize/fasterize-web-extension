@@ -21,7 +21,9 @@
     "tabs",
     "cookies",
     "storage",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "scripting",
+    "webNavigation"
   ],
   "host_permissions": [
     "http://*/*",
@@ -49,5 +51,15 @@
       ]
     }
   ],
+  "externally_connectable": {
+    "matches": [
+      "https://dashboard.fasterize.com/*",
+      "https://console.fasterize.com/*",
+      "https://console-staging2.fasterize.com/*",
+      "https://console-scw-stag01.fasterize.com/*",
+      "http://localhost:3000/*",
+      "http://127.0.0.1:3000/*"
+    ]
+  },
   "incognito": "spanning"
 }
