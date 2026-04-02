@@ -7,7 +7,9 @@
  * NO :has, :is, :where, :not, or other advanced pseudo-classes.
  */
 
-/* global chrome */
+/* global chrome, browser */
+
+var browserApi = (typeof browser !== 'undefined' && browser.runtime) ? browser : chrome;
 
 // ─── Selector Generator ───────────────────────────────────────────────────────
 
@@ -159,7 +161,7 @@ var instructionEl = null;
 
 // ─── Message Listener ─────────────────────────────────────────────────────────
 
-chrome.runtime.onMessage.addListener(function (message) {
+browserApi.runtime.onMessage.addListener(function (message) {
   if (message.type === 'FSTRZ_ACTIVATE_PICKER') {
     activate();
   }
@@ -605,7 +607,7 @@ function toggleListMode() {
 function validate() {
   if (selectedElements.length === 0) return;
 
-  chrome.runtime.sendMessage({
+  browserApi.runtime.sendMessage({
     type: 'FSTRZ_SELECTOR_PICKED',
     selector: currentSelector,
     previewText: currentPreviewText,
@@ -615,7 +617,7 @@ function validate() {
 }
 
 function cancel() {
-  chrome.runtime.sendMessage({
+  browserApi.runtime.sendMessage({
     type: 'FSTRZ_PICK_CANCELLED',
   });
   deactivate();

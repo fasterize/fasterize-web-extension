@@ -73,6 +73,12 @@ const appManifestFirefox = require('./tmp/manifest.json');
 delete appManifestFirefox.incognito;
 // externally_connectable is Chrome-only (not supported by Firefox).
 delete appManifestFirefox.externally_connectable;
+// scripting and webNavigation are used for picker (Chrome-only feature).
+if (appManifestFirefox.permissions) {
+    appManifestFirefox.permissions = appManifestFirefox.permissions.filter(
+        function(p) { return p !== 'scripting' && p !== 'webNavigation'; }
+    );
+}
 // Firefox can open popup with openPopup() method. And we need to ask permission to access all urls.
 appManifestFirefox.action = {
     "default_title": "Fasterize",

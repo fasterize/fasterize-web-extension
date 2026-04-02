@@ -221,7 +221,7 @@ browserApi.runtime.onMessageExternal.addListener((message, sender, sendResponse)
 // Internal messages from picker-content.js (selector picked or cancelled)
 // Uses message.type (not message.action) so no conflict with existing handler
 browserApi.runtime.onMessage.addListener((message, sender) => {
-  if (!activePickerSession) return;
+  if (!activePickerSession) return false;
 
   if (message.type === 'FSTRZ_SELECTOR_PICKED' && sender.tab && sender.tab.id === activePickerSession.pickerTabId) {
     activePickerSession.sendResponse({
@@ -261,11 +261,12 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
 
   // Cancel existing session
   if (activePickerSession) {
-    try {
-      await browserApi.windows.remove(activePickerSession.pickerWindowId);
-    } catch (e) { /* window may already be closed */ }
-    activePickerSession.sendResponse({ success: false });
+    var previousSession = activePickerSession;
     activePickerSession = null;
+    previousSession.sendResponse({ success: false });
+    try {
+      await browserApi.windows.remove(previousSession.pickerWindowId);
+    } catch (e) { /* window may already be closed */ }
   }
 
   // Create new window with target URL
@@ -288,6 +289,8 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
       pickerWindowId: win.id,
       sendResponse: sendResponse,
     };
+
+    injectPicker(tabId);
   } catch (e) {
     console.log('Fasterize extension : failed to open picker window', e);
     sendResponse({ success: false });
