@@ -76,7 +76,7 @@ delete appManifestFirefox.externally_connectable;
 // scripting and webNavigation are used for picker (Chrome-only feature).
 if (appManifestFirefox.permissions) {
     appManifestFirefox.permissions = appManifestFirefox.permissions.filter(
-        function(p) { return p !== 'scripting' && p !== 'webNavigation'; }
+        function(p) { return p !== 'scripting' && p !== 'webNavigation' && p !== 'declarativeNetRequest'; }
     );
 }
 // Firefox can open popup with openPopup() method. And we need to ask permission to access all urls.

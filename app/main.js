@@ -142,6 +142,7 @@ browserApi.tabs.onRemoved.addListener(tabId => {
   if (activePickerSession && activePickerSession.pickerTabId === tabId) {
     activePickerSession.sendResponse({ success: false });
     activePickerSession = null;
+    removePickerJsBlockingRules();
   }
 });
 
@@ -232,10 +233,12 @@ browserApi.runtime.onMessage.addListener((message, sender) => {
     });
     browserApi.windows.remove(activePickerSession.pickerWindowId).catch(() => {});
     activePickerSession = null;
+    removePickerJsBlockingRules();
   } else if (message.type === 'FSTRZ_PICK_CANCELLED' && sender.tab && sender.tab.id === activePickerSession.pickerTabId) {
     activePickerSession.sendResponse({ success: false });
     browserApi.windows.remove(activePickerSession.pickerWindowId).catch(() => {});
     activePickerSession = null;
+    removePickerJsBlockingRules();
   }
 });
 
@@ -245,6 +248,40 @@ browserApi.webNavigation.onCompleted.addListener(details => {
   if (details.frameId !== 0) return; // Main frame only
   injectPicker(details.tabId);
 });
+
+// IDs for declarativeNetRequest session rules (picker JS blocking)
+var PICKER_BLOCK_SCRIPTS_RULE_ID = 9001;
+var PICKER_BLOCK_INLINE_SCRIPTS_RULE_ID = 9002;
+
+async function addPickerJsBlockingRules(tabId) {
+  await browserApi.declarativeNetRequest.updateSessionRules({
+    addRules: [
+      {
+        id: PICKER_BLOCK_SCRIPTS_RULE_ID,
+        condition: { resourceTypes: ['script'], tabIds: [tabId] },
+        action: { type: 'block' },
+      },
+      {
+        id: PICKER_BLOCK_INLINE_SCRIPTS_RULE_ID,
+        condition: { resourceTypes: ['main_frame', 'sub_frame'], tabIds: [tabId] },
+        action: {
+          type: 'modifyHeaders',
+          responseHeaders: [
+            { header: 'Content-Security-Policy', operation: 'set', value: "script-src 'none'" },
+          ],
+        },
+      },
+    ],
+  });
+}
+
+async function removePickerJsBlockingRules() {
+  try {
+    await browserApi.declarativeNetRequest.updateSessionRules({
+      removeRuleIds: [PICKER_BLOCK_SCRIPTS_RULE_ID, PICKER_BLOCK_INLINE_SCRIPTS_RULE_ID],
+    });
+  } catch (e) { /* rules may already be removed */ }
+}
 
 async function handleOpenPicker(message, dashboardTabId, sendResponse) {
   // Validate URL
@@ -264,15 +301,15 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
     var previousSession = activePickerSession;
     activePickerSession = null;
     previousSession.sendResponse({ success: false });
+    await removePickerJsBlockingRules();
     try {
       await browserApi.windows.remove(previousSession.pickerWindowId);
     } catch (e) { /* window may already be closed */ }
   }
 
-  // Create new window with target URL
+  // Create new window without URL (about:blank), block JS, then navigate
   try {
     const win = await browserApi.windows.create({
-      url: message.url,
       type: 'normal',
       focused: true,
     });
@@ -282,6 +319,12 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
       sendResponse({ success: false });
       return;
     }
+
+    // Block all JS execution on this tab before navigating
+    await addPickerJsBlockingRules(tabId);
+
+    // Now navigate to the target URL (JS is already blocked)
+    await browserApi.tabs.update(tabId, { url: message.url });
 
     activePickerSession = {
       dashboardTabId: dashboardTabId,
@@ -293,6 +336,7 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
     injectPicker(tabId);
   } catch (e) {
     console.log('Fasterize extension : failed to open picker window', e);
+    await removePickerJsBlockingRules();
     sendResponse({ success: false });
   }
 }
