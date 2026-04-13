@@ -58,7 +58,8 @@
       "https://console-staging2.fasterize.com/*",
       "https://console-scw-stag01.fasterize.com/*",
       "http://localhost:3000/*",
-      "http://127.0.0.1:3000/*"
+      "http://127.0.0.1:3000/*",
+      "https://*.vercel.app/*"
     ]
   },
   "incognito": "spanning"
