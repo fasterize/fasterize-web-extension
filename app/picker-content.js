@@ -155,9 +155,22 @@ var currentMatchCount = 0;
 
 // UI elements
 var selectorDisplay = null;
-var countChip = null;
 var validateBtn = null;
-var instructionEl = null;
+var listModeBtn = null;
+var anchorBtn = null;
+var panelEl = null;
+
+// Panel anchor position: 'right' or 'left'
+var panelAnchor = 'right';
+
+// Body padding backup
+var originalBodyPaddingTop = '';
+
+// Font link element injected into host page
+var fontLink = null;
+
+// Port to service worker
+var pickerPort = null;
 
 // ─── Message Listener ─────────────────────────────────────────────────────────
 
@@ -174,82 +187,108 @@ var STYLES = [
 
   '.fstrz-header {',
   '  position: fixed; top: 0; left: 0; right: 0;',
-  '  display: flex; align-items: center; gap: 12px;',
+  '  display: flex; flex-direction: column; gap: 4px;',
   '  padding: 10px 20px;',
-  '  background: #1a1a2e; color: #fff;',
-  '  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
+  '  background: #61CED1; color: #073148;',
+  '  font-family: Poppins, sans-serif;',
   '  font-size: 14px; pointer-events: auto;',
-  '  box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 1;',
+  '  z-index: 1;',
+  '}',
+
+  '.fstrz-header-line1 {',
+  '  display: flex; align-items: center; gap: 10px;',
   '}',
 
   '.fstrz-header-icon {',
   '  display: flex; align-items: center; justify-content: center;',
-  '  width: 32px; height: 32px; flex-shrink: 0;',
+  '  width: 28px; height: 28px; flex-shrink: 0;',
   '}',
 
   '.fstrz-header-title { font-weight: 600; font-size: 15px; white-space: nowrap; }',
 
-  '.fstrz-header-instruction { color: rgba(255,255,255,0.7); font-size: 13px; flex: 1; }',
+  '.fstrz-header-spacer { flex: 1; }',
 
-  '.fstrz-footer {',
-  '  position: fixed; bottom: 0; left: 0; right: 0;',
-  '  display: flex; align-items: center; gap: 12px;',
-  '  padding: 10px 20px;',
-  '  background: #1a1a2e; color: #fff;',
-  '  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
-  '  font-size: 14px; pointer-events: auto;',
-  '  box-shadow: 0 -2px 8px rgba(0,0,0,0.3); z-index: 1;',
+  '.fstrz-close-btn {',
+  '  display: flex; align-items: center; justify-content: center;',
+  '  width: 28px; height: 28px; flex-shrink: 0;',
+  '  background: transparent; border: none; cursor: pointer;',
+  '  border-radius: 4px; color: #073148; transition: background 0.15s;',
+  '}',
+
+  '.fstrz-close-btn:hover { background: rgba(7,49,72,0.1); }',
+
+  '.fstrz-header-line2 {',
+  '  font-size: 12px; opacity: 0.85; line-height: 1.4;',
+  '}',
+
+  /* ── Floating Panel ── */
+  '.fstrz-panel {',
+  '  position: fixed; bottom: 20px;',
+  '  width: 286px; padding: 18px;',
+  '  background: #FFFFFF; border: 1px solid #E7EBED;',
+  '  border-radius: 8px;',
+  '  box-shadow: 3px 3px 16px 0px rgba(53,64,82,0.2);',
+  '  font-family: Poppins, sans-serif; font-size: 13px;',
+  '  pointer-events: auto; z-index: 1;',
+  '  display: flex; flex-direction: column; gap: 10px;',
+  '  right: 20px;',
+  '  transition: transform 0.25s ease;',
+  '}',
+
+  '.fstrz-panel.anchor-left { transform: translateX(calc(-100vw + 100% + 40px)); }',
+
+  '.fstrz-panel-controls {',
+  '  display: flex; justify-content: space-between; align-items: center;',
+  '}',
+
+  '.fstrz-anchor-btn {',
+  '  display: flex; align-items: center; justify-content: center;',
+  '  width: 32px; height: 32px;',
+  '  border: 1px solid #E7EBED; border-radius: 4px;',
+  '  background: #FFFFFF; cursor: pointer; color: #526F7F;',
+  '  transition: background 0.15s;',
+  '}',
+
+  '.fstrz-anchor-btn:hover { background: #F5F5F5; }',
+
+  '.fstrz-list-btn {',
+  '  display: flex; align-items: center; gap: 6px;',
+  '  padding: 6px 10px;',
+  '  border: 1px solid #E7EBED; border-radius: 4px;',
+  '  background: #FFFFFF; cursor: pointer;',
+  '  color: #526F7F; font-family: Poppins, sans-serif; font-size: 12px;',
+  '  transition: all 0.15s;',
+  '}',
+
+  '.fstrz-list-btn:hover { background: #F5F5F5; }',
+
+  '.fstrz-list-btn.active {',
+  '  background: #DBF4F5; border-color: #61CED1; color: #073148;',
   '}',
 
   '.fstrz-selector-display {',
-  '  flex: 1;',
-  '  font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;',
-  '  font-size: 13px; background: rgba(255,255,255,0.1);',
-  '  padding: 6px 12px; border-radius: 4px;',
+  '  font-family: "Courier Prime", Arial, sans-serif;',
+  '  font-size: 13px; background: #F5F5F5;',
+  '  padding: 8px 10px; border-radius: 4px;',
+  '  border: 1px solid #E7EBED;',
   '  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;',
-  '  color: rgba(255,255,255,0.6); min-width: 0;',
+  '  color: #8297A3;',
   '}',
 
-  '.fstrz-selector-display.has-value { color: #fff; }',
+  '.fstrz-selector-display.has-value { color: #073148; }',
 
-  '.fstrz-count-chip {',
-  '  display: none; align-items: center; gap: 4px;',
-  '  padding: 4px 10px; border-radius: 12px;',
-  '  background: rgba(76,175,80,0.2); color: #66BB6A;',
-  '  font-size: 12px; font-weight: 600; white-space: nowrap;',
+  '.fstrz-validate-btn {',
+  '  width: 100%; padding: 9px 0;',
+  '  border: none; border-radius: 4px;',
+  '  font-family: Poppins, sans-serif; font-size: 13px; font-weight: 600;',
+  '  cursor: pointer; transition: background 0.15s;',
+  '  background: #61CED1; color: #073148;',
   '}',
 
-  '.fstrz-count-chip.visible { display: flex; }',
+  '.fstrz-validate-btn:hover { background: #073148; color: #FFFFFF; }',
 
-  '.fstrz-toggle-btn {',
-  '  display: flex; align-items: center; justify-content: center;',
-  '  width: 36px; height: 36px;',
-  '  border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;',
-  '  background: transparent; color: rgba(255,255,255,0.6);',
-  '  cursor: pointer; flex-shrink: 0; transition: all 0.15s;',
-  '}',
-
-  '.fstrz-toggle-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }',
-
-  '.fstrz-toggle-btn.active {',
-  '  background: rgba(33,150,243,0.2); border-color: #2196F3; color: #2196F3;',
-  '}',
-
-  '.fstrz-btn {',
-  '  padding: 7px 20px; border-radius: 4px; font-size: 13px; font-weight: 500;',
-  '  cursor: pointer; border: none; white-space: nowrap; transition: all 0.15s;',
-  '}',
-
-  '.fstrz-btn-cancel {',
-  '  background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff;',
-  '}',
-
-  '.fstrz-btn-cancel:hover { background: rgba(255,255,255,0.1); }',
-
-  '.fstrz-btn-validate { background: #4CAF50; color: #fff; }',
-  '.fstrz-btn-validate:hover { background: #43A047; }',
-  '.fstrz-btn-validate:disabled {',
-  '  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); cursor: default;',
+  '.fstrz-validate-btn:disabled {',
+  '  background: #E7EBED; color: #8297A3; cursor: default;',
   '}',
 
   '.fstrz-svg-overlay {',
@@ -262,7 +301,13 @@ var STYLES = [
 
 var CROSSHAIR_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>';
 
-var LIST_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+var LIST_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+
+var CLOSE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+var ARROW_RIGHT_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+var ARROW_LEFT_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>';
 
 // ─── Activation ───────────────────────────────────────────────────────────────
 
@@ -270,6 +315,7 @@ function activate() {
   if (isActive) return;
   isActive = true;
   isListMode = false;
+  panelAnchor = 'right';
   selectedElements = [];
   selectedRects = [];
   hoveredListElements = [];
@@ -278,11 +324,27 @@ function activate() {
   currentPreviewText = '';
   currentMatchCount = 0;
 
+  // Open port to service worker
+  pickerPort = browserApi.runtime.connect({ name: 'fstrz-picker' });
+  pickerPort.onDisconnect.addListener(function () {
+    console.log('Fasterize picker: port disconnected (service worker stopped)');
+    pickerPort = null;
+  });
+
+  // Save and adjust body padding for header
+  originalBodyPaddingTop = document.body.style.paddingTop;
+
   // Create Shadow DOM host
   shadowHost = document.createElement('div');
   shadowHost.id = 'fstrz-picker-host';
   shadowHost.style.cssText = 'all: initial; position: fixed; z-index: 2147483647; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;';
   document.documentElement.appendChild(shadowHost);
+
+  // Inject Google Fonts <link> into the host page <head>
+  fontLink = document.createElement('link');
+  fontLink.rel = 'stylesheet';
+  fontLink.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Courier+Prime&display=swap';
+  document.head.appendChild(fontLink);
 
   shadowRoot = shadowHost.attachShadow({ mode: 'closed' });
 
@@ -296,41 +358,55 @@ function activate() {
   svgOverlay.setAttribute('class', 'fstrz-svg-overlay');
   shadowRoot.appendChild(svgOverlay);
 
-  // Create header
+  // Create header (2 lines)
   var header = document.createElement('div');
   header.className = 'fstrz-header';
   header.innerHTML =
-    '<div class="fstrz-header-icon">' + CROSSHAIR_SVG + '</div>' +
-    '<span class="fstrz-header-title">Element Picker</span>' +
-    '<span class="fstrz-header-instruction" id="fstrz-instruction">Click on an element to select it</span>';
+    '<div class="fstrz-header-line1">' +
+      '<div class="fstrz-header-icon">' + CROSSHAIR_SVG + '</div>' +
+      '<span class="fstrz-header-title">Element Picker</span>' +
+      '<div class="fstrz-header-spacer"></div>' +
+      '<button class="fstrz-close-btn" id="fstrz-close" title="Close">' + CLOSE_SVG + '</button>' +
+    '</div>' +
+    '<div class="fstrz-header-line2">' +
+      '<strong>Warning</strong>: JavaScript is disabled on this page \u2014 Only the elements visible here can be targeted by EdgeSEO.' +
+    '</div>';
   shadowRoot.appendChild(header);
 
-  // Create footer
-  var footer = document.createElement('div');
-  footer.className = 'fstrz-footer';
-  footer.innerHTML =
-    '<span class="fstrz-selector-display" id="fstrz-selector">No element selected</span>' +
-    '<span class="fstrz-count-chip" id="fstrz-count"></span>' +
-    '<button class="fstrz-toggle-btn" id="fstrz-toggle" title="Toggle list selection">' + LIST_SVG + '</button>' +
-    '<button class="fstrz-btn fstrz-btn-cancel" id="fstrz-cancel">Cancel</button>' +
-    '<button class="fstrz-btn fstrz-btn-validate" id="fstrz-validate" disabled>Validate</button>';
-  shadowRoot.appendChild(footer);
+  // Adjust body padding after header is in DOM
+  requestAnimationFrame(function () {
+    var headerHeight = header.getBoundingClientRect().height;
+    var currentPadding = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+    document.body.style.paddingTop = (currentPadding + headerHeight) + 'px';
+  });
+
+  // Create floating panel
+  panelEl = document.createElement('div');
+  panelEl.className = 'fstrz-panel';
+  panelEl.innerHTML =
+    '<div class="fstrz-panel-controls">' +
+      '<button class="fstrz-anchor-btn" id="fstrz-anchor" title="Move panel">' + ARROW_LEFT_SVG + '</button>' +
+      '<button class="fstrz-list-btn" id="fstrz-list-mode">' + LIST_SVG + ' Select list</button>' +
+    '</div>' +
+    '<div class="fstrz-selector-display" id="fstrz-selector">No element selected</div>' +
+    '<button class="fstrz-validate-btn" id="fstrz-validate" disabled>Validate</button>';
+  shadowRoot.appendChild(panelEl);
 
   // Cache UI refs
   selectorDisplay = shadowRoot.getElementById('fstrz-selector');
-  countChip = shadowRoot.getElementById('fstrz-count');
   validateBtn = shadowRoot.getElementById('fstrz-validate');
-  instructionEl = shadowRoot.getElementById('fstrz-instruction');
+  listModeBtn = shadowRoot.getElementById('fstrz-list-mode');
+  anchorBtn = shadowRoot.getElementById('fstrz-anchor');
 
   // Button events
-  var cancelBtn = shadowRoot.getElementById('fstrz-cancel');
-  if (cancelBtn) cancelBtn.addEventListener('click', cancel);
+  var closeBtn = shadowRoot.getElementById('fstrz-close');
+  if (closeBtn) closeBtn.addEventListener('click', cancel);
   if (validateBtn) validateBtn.addEventListener('click', validate);
-  var toggleBtn = shadowRoot.getElementById('fstrz-toggle');
-  if (toggleBtn) toggleBtn.addEventListener('click', toggleListMode);
+  if (listModeBtn) listModeBtn.addEventListener('click', toggleListMode);
+  if (anchorBtn) anchorBtn.addEventListener('click', togglePanelAnchor);
 
   // Create hover rect in SVG
-  hoverRect = createSvgRect('rgba(33,150,243,0.08)', '#2196F3');
+  hoverRect = createSvgRect('rgba(97,206,209,0.10)', '#61CED1');
   hoverRect.style.display = 'none';
   svgOverlay.appendChild(hoverRect);
 
@@ -527,7 +603,7 @@ function onClick(e) {
     currentMatchCount = selectedElements.length;
   }
 
-  updateFooterUI();
+  updatePanelUI();
 }
 
 function onKeyDown(e) {
@@ -551,30 +627,28 @@ function onScrollResize() {
   });
 }
 
-// ─── Footer UI Updates ────────────────────────────────────────────────────────
+// ─── Panel UI Updates ─────────────────────────────────────────────────────────
 
-function updateFooterUI() {
+function updatePanelUI() {
   if (selectorDisplay) {
     if (currentSelector) {
       selectorDisplay.textContent = currentSelector;
+      selectorDisplay.title = currentSelector;
       selectorDisplay.classList.add('has-value');
     } else {
       selectorDisplay.textContent = 'No element selected';
+      selectorDisplay.title = '';
       selectorDisplay.classList.remove('has-value');
-    }
-  }
-
-  if (countChip) {
-    if (currentMatchCount > 0) {
-      countChip.textContent = currentMatchCount + ' match' + (currentMatchCount > 1 ? 'es' : '');
-      countChip.classList.add('visible');
-    } else {
-      countChip.classList.remove('visible');
     }
   }
 
   if (validateBtn) {
     validateBtn.disabled = selectedElements.length === 0;
+    if (currentMatchCount > 0) {
+      validateBtn.textContent = 'Validate (' + currentMatchCount + ' match' + (currentMatchCount > 1 ? 'es' : '') + ')';
+    } else {
+      validateBtn.textContent = 'Validate';
+    }
   }
 }
 
@@ -582,15 +656,9 @@ function updateFooterUI() {
 
 function toggleListMode() {
   isListMode = !isListMode;
-  var toggleBtn = shadowRoot ? shadowRoot.getElementById('fstrz-toggle') : null;
-  if (toggleBtn) {
-    toggleBtn.classList.toggle('active', isListMode);
-  }
 
-  if (instructionEl) {
-    instructionEl.textContent = isListMode
-      ? 'Hover to detect list, click to select all items'
-      : 'Click on an element to select it';
+  if (listModeBtn) {
+    listModeBtn.classList.toggle('active', isListMode);
   }
 
   clearSelectedRects();
@@ -599,7 +667,21 @@ function toggleListMode() {
   currentSelector = '';
   currentPreviewText = '';
   currentMatchCount = 0;
-  updateFooterUI();
+  updatePanelUI();
+}
+
+// ─── Toggle Panel Anchor ──────────────────────────────────────────────────────
+
+function togglePanelAnchor() {
+  if (panelAnchor === 'right') {
+    panelAnchor = 'left';
+    if (panelEl) panelEl.classList.add('anchor-left');
+    if (anchorBtn) anchorBtn.innerHTML = ARROW_RIGHT_SVG;
+  } else {
+    panelAnchor = 'right';
+    if (panelEl) panelEl.classList.remove('anchor-left');
+    if (anchorBtn) anchorBtn.innerHTML = ARROW_LEFT_SVG;
+  }
 }
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
@@ -607,19 +689,21 @@ function toggleListMode() {
 function validate() {
   if (selectedElements.length === 0) return;
 
-  browserApi.runtime.sendMessage({
-    type: 'FSTRZ_SELECTOR_PICKED',
-    selector: currentSelector,
-    previewText: currentPreviewText,
-    matchCount: currentMatchCount,
-  });
+  if (pickerPort) {
+    pickerPort.postMessage({
+      type: 'FSTRZ_SELECTOR_PICKED',
+      selector: currentSelector,
+      previewText: currentPreviewText,
+      matchCount: currentMatchCount,
+    });
+  }
   deactivate();
 }
 
 function cancel() {
-  browserApi.runtime.sendMessage({
-    type: 'FSTRZ_PICK_CANCELLED',
-  });
+  if (pickerPort) {
+    pickerPort.postMessage({ type: 'FSTRZ_PICK_CANCELLED' });
+  }
   deactivate();
 }
 
@@ -653,14 +737,29 @@ function deactivate() {
   currentPreviewText = '';
   currentMatchCount = 0;
 
+  // Reset panel anchor
+  panelAnchor = 'right';
+
+  // Restore body padding
+  document.body.style.paddingTop = originalBodyPaddingTop;
+  originalBodyPaddingTop = '';
+
+  // Disconnect port
+  if (pickerPort) pickerPort.disconnect();
+  pickerPort = null;
+
+  if (fontLink) fontLink.remove();
+  fontLink = null;
+
   if (shadowHost) shadowHost.remove();
   shadowHost = null;
   shadowRoot = null;
   svgOverlay = null;
   selectorDisplay = null;
-  countChip = null;
   validateBtn = null;
-  instructionEl = null;
+  listModeBtn = null;
+  anchorBtn = null;
+  panelEl = null;
 
   document.removeEventListener('mouseover', onMouseOver, true);
   document.removeEventListener('mouseout', onMouseOut, true);
