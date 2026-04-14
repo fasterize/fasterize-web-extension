@@ -140,9 +140,10 @@ browserApi.tabs.onRemoved.addListener(tabId => {
 
   // Picker: cleanup session if picker tab was closed
   if (activePickerSession && activePickerSession.pickerTabId === tabId) {
-    activePickerSession.sendResponse({ success: false });
-    activePickerSession = null;
-    removePickerJsBlockingRules();
+    if (dashboardPort) {
+      dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+    }
+    cleanupPickerSession(true); // skip window removal, tab is already gone
   }
 });
 
@@ -199,47 +200,93 @@ browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // ─── CSS Selector Picker ────────────────────────────────────────────────────
 // Allows the dashboard to open a visual element picker on any page.
-// Communication: dashboard → onMessageExternal → open window → inject picker-content.js
-//                picker-content.js → onMessage → relay result back to dashboard
+// Communication via long-lived ports (keeps SW alive during picking):
+//   dashboard → onConnectExternal (port 'fstrz-picker-dashboard') → open window → inject picker-content.js
+//   picker-content.js → onConnect (port 'fstrz-picker') → relay result → dashboardPort
 
 let activePickerSession = null;
+let dashboardPort = null;
 
-// External messages from the dashboard (via externally_connectable)
+// Recover from SW restart: clean up orphaned picker sessions
+browserApi.storage.session.get('pickerSession').then(result => {
+  if (result.pickerSession) {
+    console.log('Fasterize extension : cleaning up orphaned picker session');
+    var session = result.pickerSession;
+    removePickerJsBlockingRules();
+    browserApi.windows.remove(session.pickerWindowId).catch(() => {});
+    browserApi.storage.session.remove('pickerSession');
+  }
+}).catch(() => {});
+
+// External messages from the dashboard (via externally_connectable) — one-shot only
 browserApi.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
   if (message.type === 'FSTRZ_PING') {
     sendResponse({ type: 'FSTRZ_PONG' });
     return false;
   }
 
-  if (message.type === 'FSTRZ_OPEN_PICKER') {
-    handleOpenPicker(message, sender.tab ? sender.tab.id : undefined, sendResponse);
-    return true; // Keep channel open for async response
-  }
-
   return false;
 });
 
-// Internal messages from picker-content.js (selector picked or cancelled)
-// Uses message.type (not message.action) so no conflict with existing handler
-browserApi.runtime.onMessage.addListener((message, sender) => {
-  if (!activePickerSession) return false;
+// External port connections from the dashboard
+browserApi.runtime.onConnectExternal.addListener(port => {
+  if (port.name !== 'fstrz-picker-dashboard') return;
 
-  if (message.type === 'FSTRZ_SELECTOR_PICKED' && sender.tab && sender.tab.id === activePickerSession.pickerTabId) {
-    activePickerSession.sendResponse({
-      success: true,
-      selector: message.selector,
-      previewText: message.previewText,
-      matchCount: message.matchCount,
-    });
-    browserApi.windows.remove(activePickerSession.pickerWindowId).catch(() => {});
-    activePickerSession = null;
-    removePickerJsBlockingRules();
-  } else if (message.type === 'FSTRZ_PICK_CANCELLED' && sender.tab && sender.tab.id === activePickerSession.pickerTabId) {
-    activePickerSession.sendResponse({ success: false });
-    browserApi.windows.remove(activePickerSession.pickerWindowId).catch(() => {});
-    activePickerSession = null;
-    removePickerJsBlockingRules();
-  }
+  dashboardPort = port;
+
+  port.onMessage.addListener(message => {
+    if (message.type === 'FSTRZ_OPEN_PICKER') {
+      handleOpenPicker(message, port.sender && port.sender.tab ? port.sender.tab.id : undefined);
+    }
+  });
+
+  port.onDisconnect.addListener(() => {
+    // Dashboard closed during picking — cleanup
+    if (dashboardPort === port) {
+      dashboardPort = null;
+      if (activePickerSession) {
+        cleanupPickerSession();
+      }
+    }
+  });
+});
+
+// Internal port connections from picker-content.js
+browserApi.runtime.onConnect.addListener(port => {
+  if (port.name !== 'fstrz-picker') return;
+  if (!activePickerSession) return;
+  if (!port.sender || !port.sender.tab || port.sender.tab.id !== activePickerSession.pickerTabId) return;
+
+  activePickerSession.pickerPort = port;
+
+  port.onMessage.addListener(message => {
+    if (message.type === 'FSTRZ_SELECTOR_PICKED') {
+      if (dashboardPort) {
+        dashboardPort.postMessage({
+          type: 'FSTRZ_SELECTOR_RESULT',
+          success: true,
+          selector: message.selector,
+          previewText: message.previewText,
+          matchCount: message.matchCount,
+        });
+      }
+      cleanupPickerSession();
+    } else if (message.type === 'FSTRZ_PICK_CANCELLED') {
+      if (dashboardPort) {
+        dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+      }
+      cleanupPickerSession();
+    }
+  });
+
+  port.onDisconnect.addListener(() => {
+    if (activePickerSession && activePickerSession.pickerPort === port) {
+      if (dashboardPort) {
+        dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+      }
+      cleanupPickerSession();
+    }
+  });
 });
 
 // Re-inject picker if user navigates within the picker tab
@@ -283,7 +330,7 @@ async function removePickerJsBlockingRules() {
   } catch (e) { /* rules may already be removed */ }
 }
 
-async function handleOpenPicker(message, dashboardTabId, sendResponse) {
+async function handleOpenPicker(message, dashboardTabId) {
   // Validate URL
   let parsed;
   try {
@@ -292,19 +339,18 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
     parsed = null;
   }
   if (!parsed || (parsed.protocol !== 'https:' && parsed.protocol !== 'http:')) {
-    sendResponse({ success: false });
+    if (dashboardPort) {
+      dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+    }
     return;
   }
 
   // Cancel existing session
   if (activePickerSession) {
-    var previousSession = activePickerSession;
-    activePickerSession = null;
-    previousSession.sendResponse({ success: false });
-    await removePickerJsBlockingRules();
-    try {
-      await browserApi.windows.remove(previousSession.pickerWindowId);
-    } catch (e) { /* window may already be closed */ }
+    if (dashboardPort) {
+      dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+    }
+    await cleanupPickerSession();
   }
 
   // Create new window without URL (about:blank), block JS, then navigate
@@ -316,7 +362,9 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
 
     const tabId = win.tabs && win.tabs[0] ? win.tabs[0].id : undefined;
     if (!tabId || !win.id) {
-      sendResponse({ success: false });
+      if (dashboardPort) {
+        dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+      }
       return;
     }
 
@@ -330,14 +378,44 @@ async function handleOpenPicker(message, dashboardTabId, sendResponse) {
       dashboardTabId: dashboardTabId,
       pickerTabId: tabId,
       pickerWindowId: win.id,
-      sendResponse: sendResponse,
+      pickerPort: null,
     };
+
+    // Persist session for SW recovery
+    browserApi.storage.session.set({
+      pickerSession: {
+        dashboardTabId: dashboardTabId,
+        pickerTabId: tabId,
+        pickerWindowId: win.id,
+      },
+    });
 
     injectPicker(tabId);
   } catch (e) {
     console.log('Fasterize extension : failed to open picker window', e);
     await removePickerJsBlockingRules();
-    sendResponse({ success: false });
+    if (dashboardPort) {
+      dashboardPort.postMessage({ type: 'FSTRZ_SELECTOR_RESULT', success: false });
+    }
+  }
+}
+
+async function cleanupPickerSession(skipWindowRemoval) {
+  if (!activePickerSession) return;
+  var session = activePickerSession;
+  activePickerSession = null;
+
+  await removePickerJsBlockingRules();
+  browserApi.storage.session.remove('pickerSession');
+
+  if (session.pickerPort) {
+    try { session.pickerPort.disconnect(); } catch (e) { /* already disconnected */ }
+  }
+
+  if (!skipWindowRemoval) {
+    try {
+      await browserApi.windows.remove(session.pickerWindowId);
+    } catch (e) { /* window may already be closed */ }
   }
 }
 
