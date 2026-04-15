@@ -9,7 +9,7 @@ Chrome and Firefox web extension for Fasterize
 
 # Install
 
-- [Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/4.4.2/fasterize_status-4.4.2.xpi)
+- [Firefox](https://github.com/fasterize/fasterize-web-extension/releases/download/4.4.3/fasterize_status-4.4.3.xpi)
 - [Chrome](https://chrome.google.com/webstore/detail/fasterize-status/pophpmnchlcddhhilmnopbahlaohdfig)
 
 # Dev
