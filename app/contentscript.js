@@ -1,5 +1,30 @@
 /* those methods are executed in the context of the current tab */
 
+/**
+ * See getRootDomain from popup.js
+ */
+function getRootDomainFromHostname(hostname) {
+  const parts = hostname.split('.');
+  let rootDomain = `.${parts.slice(-2).join('.')}`;
+  if (rootDomain === '.co.uk' || rootDomain === '.com.tr') {
+    rootDomain = `.${parts.slice(-3).join('.')}`;
+  }
+  return rootDomain;
+}
+
+function parseCookieValue(name) {
+  const match = document.cookie.split('; ').find(c => c.startsWith(name + '='));
+  return match ? match.slice(name.length + 1) : null;
+}
+
+function setDocumentCookie(name, value, domain) {
+  document.cookie = `${name}=${value}; path=/; domain=${domain}; max-age=31536000`;
+}
+
+function removeDocumentCookie(name, domain) {
+  document.cookie = `${name}=; path=/; domain=${domain}; max-age=0`;
+}
+
 function highlightFragments() {
   const fragments = document.querySelectorAll('[data-fstrz-fragment-id]');
   fragments.forEach(f => {
@@ -43,6 +68,26 @@ function getPageType() {
 
 browser.runtime.onMessage.addListener((request, sender) => {
   switch (request.action) {
+    case 'get_cookie': {
+      const value = parseCookieValue(request.name);
+      return Promise.resolve(value !== null ? { value } : null);
+    }
+    case 'set_fstrz_cookie': {
+      const domain = getRootDomainFromHostname(window.location.hostname);
+      setDocumentCookie('fstrz', request.value, domain);
+      setDocumentCookie('frz-forced-state', 'true', domain);
+      return Promise.resolve();
+    }
+    case 'set_cookie': {
+      const domain = getRootDomainFromHostname(window.location.hostname);
+      setDocumentCookie(request.name, request.value, domain);
+      return Promise.resolve();
+    }
+    case 'remove_cookie': {
+      const domain = getRootDomainFromHostname(window.location.hostname);
+      removeDocumentCookie(request.name, domain);
+      return Promise.resolve();
+    }
     case 'highlight_fragments':
       highlightFragments();
       return Promise.resolve();
