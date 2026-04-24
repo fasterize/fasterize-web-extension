@@ -5,15 +5,9 @@ function logError(e) {
 }
 
 function getRootDomain(tmp) {
-  let rootDomain = `.${tmp.hostname
-    .split('.')
-    .slice(-2)
-    .join('.')}`;
+  let rootDomain = `.${tmp.hostname.split('.').slice(-2).join('.')}`;
   if (rootDomain === '.co.uk' || rootDomain === '.com.tr') {
-    rootDomain = `.${tmp.hostname
-      .split('.')
-      .slice(-3)
-      .join('.')}`;
+    rootDomain = `.${tmp.hostname.split('.').slice(-3).join('.')}`;
   }
   return rootDomain;
 }
@@ -49,7 +43,7 @@ function setOptimizationCookie(cookieName, url, value) {
     domain: getRootDomain(tmp),
     name: cookieName,
     value,
-  })
+  });
 }
 
 function getFstrzCookie(url) {
@@ -117,7 +111,7 @@ function reloadPopup(tabID) {
     windowId: browserApi.windows.WINDOW_ID_CURRENT,
   };
 
-  browserApi.tabs.query(queryInfo).then(async tabs => {
+  browserApi.tabs.query(queryInfo).then(async (tabs) => {
     const tabID = tabs[0].id;
     // get the extension's window object
     const details = (await browserApi.storage.local.get([tabID.toString()]))[tabID];
@@ -132,7 +126,6 @@ function reloadPopup(tabID) {
 
     $('#smartcache-toggle').hide();
     if (request.headers['x-fstrz']) {
-
       const explanation = [];
       for (const flag in request.status) {
         explanation.push(
@@ -147,7 +140,7 @@ function reloadPopup(tabID) {
       $('#x-fstrz-explanation').html(explanation.join(' '));
 
       getFstrzCookie(request.details.url)
-        .then(fstrzCookie => {
+        .then((fstrzCookie) => {
           if ((fstrzCookie && fstrzCookie.value === 'false') || request.headers['x-fstrz'].indexOf('Z') >= 0) {
             $('#fstrz-false').hide();
             $('#optimized_options').hide();
@@ -160,22 +153,27 @@ function reloadPopup(tabID) {
         .catch(logError);
 
       getFstrzVaryCookie(request.details.url)
-        .then(fstrzVaryCookie => {
+        .then((fstrzVaryCookie) => {
           $('#cookie-fstrz-vary').val(fstrzVaryCookie && fstrzVaryCookie.value);
         })
         .catch(logError);
 
-      request.getTargetLabel().then(targetLabel => {
-        $('#target-fstrz').val(targetLabel);
-      }).catch(logError);
+      request
+        .getTargetLabel()
+        .then((targetLabel) => {
+          $('#target-fstrz').val(targetLabel);
+        })
+        .catch(logError);
 
-      request.getPageType().then(pageType => {
-        $('#page-type-fstrz').val(pageType);
-      }).catch(logError);
-
+      request
+        .getPageType()
+        .then((pageType) => {
+          $('#page-type-fstrz').val(pageType);
+        })
+        .catch(logError);
 
       getDebugCookie(request.details.url)
-        .then(debugCookie => {
+        .then((debugCookie) => {
           if (debugCookie && debugCookie.value === 'true') {
             $('#enable-trace').hide();
           } else {
@@ -186,44 +184,40 @@ function reloadPopup(tabID) {
 
       request
         .getFrzFlags()
-        .then(flags => {
+        .then((flags) => {
           for (flag in flags) {
-              if(flag === 'edge_speed' || flag === 'edge_seo') {
-                  $(`#fstrz-e${flag.split('_')[1]}`).prop('checked', flags[flag]);
-              }else{
-                const flagElement = document.getElementById(flag);
-                if(flagElement) {
-                  document.getElementById(flag).checked = flags[flag];
-                }else{
-                  console.warn(`Flag ${flag} not found`);
-                }
+            if (flag === 'edge_speed' || flag === 'edge_seo') {
+              $(`#fstrz-e${flag.split('_')[1]}`).prop('checked', flags[flag]);
+            } else {
+              const flagElement = document.getElementById(flag);
+              if (flagElement) {
+                document.getElementById(flag).checked = flags[flag];
+              } else {
+                console.warn(`Flag ${flag} not found`);
               }
+            }
           }
           $('#testflags table').show();
-        }).then(() => {
+        })
+        .then(() => {
           getOptimizationCookie('frz_espeed', request.details.url)
-              .then(optimizationCookie => {
-                if (
-                    optimizationCookie ||
-                    request.headers['x-frz-espeed']
-                ) {
-                  const checked = optimizationCookie ? optimizationCookie.value : request.headers['x-frz-espeed'];
-                  $('#fstrz-espeed').prop('checked', checked !== 'false');
-                }
-              })
-              .catch(logError);
+            .then((optimizationCookie) => {
+              if (optimizationCookie || request.headers['x-frz-espeed']) {
+                const checked = optimizationCookie ? optimizationCookie.value : request.headers['x-frz-espeed'];
+                $('#fstrz-espeed').prop('checked', checked !== 'false');
+              }
+            })
+            .catch(logError);
           getOptimizationCookie('frz_eseo', request.details.url)
-              .then(optimizationCookie => {
-                if (
-                    optimizationCookie ||
-                    request.headers['x-frz-eseo']
-                ) {
-                  const checked = optimizationCookie ? optimizationCookie.value : request.headers['x-frz-eseo'];
-                  $('#fstrz-eseo').prop('checked', checked !== 'false');
-                }
-              })
-          .catch(logError);
-      }).catch(logError);
+            .then((optimizationCookie) => {
+              if (optimizationCookie || request.headers['x-frz-eseo']) {
+                const checked = optimizationCookie ? optimizationCookie.value : request.headers['x-frz-eseo'];
+                $('#fstrz-eseo').prop('checked', checked !== 'false');
+              }
+            })
+            .catch(logError);
+        })
+        .catch(logError);
     } else {
       $('#section-top').text('This website is not served by Fasterize');
       $('#section-middle').hide();
@@ -231,9 +225,9 @@ function reloadPopup(tabID) {
     }
 
     if (request.pluggedToCDN()) {
-      $('#cdn_status').html(
-        request.servedByCDN() ? '<a class="btn btn-default">HIT</a>' : '<a class="btn btn-default">MISS</a>'
-      );
+      const cfCacheStatus = request.headers['cf-cache-status'];
+      const statusLabel = cfCacheStatus || (request.servedByCDN() ? 'HIT' : 'MISS');
+      $('#cdn_status').html(`<a class="btn btn-default">${statusLabel}</a>`);
     } else {
       $('#cdn_div').hide();
     }
@@ -265,9 +259,7 @@ function reloadPopup(tabID) {
     });
 
     $('#fstrz-espeed').on('click', () => {
-      const checked = $('#fstrz-espeed')
-        .prop('checked')
-        .toString();
+      const checked = $('#fstrz-espeed').prop('checked').toString();
       setOptimizationCookie('frz_espeed', request.details.url, checked)
         .then(() => {
           return reloadPopup(tabID);
@@ -276,9 +268,7 @@ function reloadPopup(tabID) {
     });
 
     $('#fstrz-eseo').on('click', () => {
-      const checked = $('#fstrz-eseo')
-        .prop('checked')
-        .toString();
+      const checked = $('#fstrz-eseo').prop('checked').toString();
       setOptimizationCookie('frz_eseo', request.details.url, checked)
         .then(() => {
           return reloadPopup(tabID);
@@ -298,7 +288,7 @@ function reloadPopup(tabID) {
       });
     });
 
-    $('.copy-button').on('click', function(evt) {
+    $('.copy-button').on('click', function (evt) {
       const $el = $(this);
       const copyId = $el.data('copyId');
       const $copyEl = $(`#${copyId}`);
@@ -319,7 +309,7 @@ function reloadPopup(tabID) {
       request.showLazyloadedImages();
     });
 
-    document.getElementById('feature-flag-table').addEventListener('click', function(e) {
+    document.getElementById('feature-flag-table').addEventListener('click', function (e) {
       if (e.target && e.target.nodeName == 'INPUT') {
         toggleFlag(e.target.id);
       }
@@ -336,7 +326,7 @@ function reloadPopup(tabID) {
 
       // chrome doesn't reload the popup by itself, firefox reload the popup
       if (navigator.userAgent.includes('Chrome')) {
-        browserApi.tabs.onUpdated.addListener(function(tabID, changeInfo, tab) {
+        browserApi.tabs.onUpdated.addListener(function (tabID, changeInfo, tab) {
           return reloadPopup(tabID);
         });
       }
@@ -345,7 +335,7 @@ function reloadPopup(tabID) {
     }
 
     $('#getFragments').on('click', () => {
-      request.getFragments().then(fragments => {
+      request.getFragments().then((fragments) => {
         fragments &&
           fragments.forEach((fragment, index) => {
             const code = document.createElement('code');
@@ -365,12 +355,12 @@ function reloadPopup(tabID) {
 
     browserApi.storage.local
       .get('disable-fasterize-cache')
-      .then(res => {
+      .then((res) => {
         $('#disable-fasterize-cache').prop('checked', res && res['disable-fasterize-cache']);
       })
       .catch(logError);
 
-    $('#disable-fasterize-cache').change(function() {
+    $('#disable-fasterize-cache').change(function () {
       browserApi.storage.local.set({ 'disable-fasterize-cache': this.checked }).catch(logError);
       browserApi.runtime
         .sendMessage({
