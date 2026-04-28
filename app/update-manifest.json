@@ -261,6 +261,10 @@
         {
           "version": "4.5.1",
           "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/4.5.1/fasterize_status-4.5.1.xpi"
+        },
+        {
+          "version": "4.5.2",
+          "update_link": "https://github.com/fasterize/fasterize-web-extension/releases/download/4.5.2/fasterize_status-4.5.2.xpi"
         }
       ]
     }
