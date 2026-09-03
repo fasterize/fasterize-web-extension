@@ -199,7 +199,7 @@ browserApi.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 // ─── CSS Selector Picker ────────────────────────────────────────────────────
-// Allows the dashboard to open a visual element picker on any page.
+// Allows the dashboard and the console (consol3) to open a visual element picker on any page.
 // Communication via long-lived ports (keeps SW alive during picking):
 //   dashboard → onConnectExternal (port 'fstrz-picker-dashboard') → open window → inject picker-content.js
 //   picker-content.js → onConnect (port 'fstrz-picker') → relay result → dashboardPort
